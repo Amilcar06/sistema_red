@@ -1,0 +1,294 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== AUTENTICACIÓN ====================
+
+model Usuario {
+  id         String      @id @default(uuid())
+  correo     String      @unique
+  contrasena String
+  nombre     String
+  rol        RolUsuario  @default(ADMIN)
+  activo     Boolean     @default(true)
+  fechaCreacion DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+
+  @@map("usuarios")
+}
+
+enum RolUsuario {
+  ADMIN
+  OPERADOR
+  VISOR
+}
+
+// ==================== SPRINT 1: CLIENTES ====================
+
+model Cliente {
+  id                 String         @id @default(uuid())
+  nombre             String
+  telefono           String
+  correo             String?
+  plan               String
+  estado             EstadoCliente  @default(ACTIVO)
+  fechaRegistro      DateTime       @default(now())
+  fechaUltimaActividad DateTime?
+  metadata           Json?          // Datos adicionales flexibles
+  
+  // Relaciones
+  notificaciones     Notificacion[]
+  promociones        ClientePromocion[]
+  
+  fechaCreacion      DateTime       @default(now())
+  fechaActualizacion DateTime       @updatedAt
+
+  @@index([telefono])
+  @@index([correo])
+  @@index([estado])
+  @@map("clientes")
+}
+
+enum EstadoCliente {
+  ACTIVO
+  INACTIVO
+  SUSPENDIDO
+}
+
+// ==================== SPRINT 3: PRODUCTOS ====================
+
+model Producto {
+  id                 String          @id @default(uuid())
+  nombre             String
+  descripcion        String?
+  categoria          String
+  precio             Decimal         @db.Decimal(10, 2)
+  activo             Boolean         @default(true)
+  
+  // Relaciones
+  promociones        PromocionProducto[]
+  
+  fechaCreacion      DateTime        @default(now())
+  fechaActualizacion DateTime        @updatedAt
+
+  @@map("productos")
+}
+
+// ==================== SPRINT 3: PROMOCIONES ====================
+
+model Promocion {
+  id                 String           @id @default(uuid())
+  nombre             String
+  descripcion        String?
+  tipoDescuento      TipoDescuento
+  valorDescuento     Decimal          @db.Decimal(10, 2)
+  fechaInicio        DateTime
+  fechaFin           DateTime
+  estado             EstadoPromocion  @default(BORRADOR)
+  segmentoObjetivo   String?          // Segmento objetivo (JSON o string)
+  plantillaMensaje   String?          // Plantilla de mensaje
+  
+  // Estadísticas
+  totalEnviados      Int              @default(0)
+  totalConvertidos   Int              @default(0)
+  
+  // Relaciones
+  productos          PromocionProducto[]
+  clientes           ClientePromocion[]
+  notificaciones     Notificacion[]
+  reglas             PromocionRegla[]
+  
+  fechaCreacion      DateTime         @default(now())
+  fechaActualizacion DateTime         @updatedAt
+
+  @@index([estado])
+  @@index([fechaInicio, fechaFin])
+  @@map("promociones")
+}
+
+enum TipoDescuento {
+  PORCENTAJE
+  MONTO_FIJO
+  GRATIS
+}
+
+enum EstadoPromocion {
+  BORRADOR
+  ACTIVA
+  PAUSADA
+  FINALIZADA
+  CANCELADA
+}
+
+model PromocionProducto {
+  id              String   @id @default(uuid())
+  promocionId     String
+  productoId      String
+  
+  promocion       Promocion @relation(fields: [promocionId], references: [id], onDelete: Cascade)
+  producto        Producto  @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  
+  fechaCreacion   DateTime @default(now())
+
+  @@unique([promocionId, productoId])
+  @@map("promocion_productos")
+}
+
+model ClientePromocion {
+  id             String               @id @default(uuid())
+  clienteId      String
+  promocionId    String
+  estado         EstadoClientePromocion @default(PENDIENTE)
+  fechaConversion DateTime?
+  
+  cliente        Cliente    @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  promocion      Promocion  @relation(fields: [promocionId], references: [id], onDelete: Cascade)
+  
+  fechaCreacion  DateTime   @default(now())
+  fechaActualizacion DateTime @updatedAt
+
+  @@unique([clienteId, promocionId])
+  @@index([estado])
+  @@map("cliente_promociones")
+}
+
+enum EstadoClientePromocion {
+  PENDIENTE
+  ENVIADA
+  CONVERTIDA
+  RECHAZADA
+}
+
+// ==================== SPRINT 2: REGLAS DE NEGOCIO ====================
+
+model ReglaNegocio {
+  id          String    @id @default(uuid())
+  nombre      String
+  descripcion String?
+  tipoRegla   TipoRegla
+  condiciones Json      // Condiciones en formato JSON
+  acciones    Json      // Acciones a ejecutar
+  prioridad   Int       @default(0)
+  activa      Boolean   @default(true)
+  
+  // Relaciones
+  promociones PromocionRegla[]
+  
+  fechaCreacion DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+
+  @@map("reglas_negocio")
+}
+
+enum TipoRegla {
+  ELEGIBILIDAD      // Regla de elegibilidad
+  DESCUENTO         // Regla de descuento
+  NOTIFICACION      // Regla de notificación
+  PROGRAMACION      // Regla de programación
+}
+
+model PromocionRegla {
+  id          String      @id @default(uuid())
+  promocionId String
+  reglaId     String
+  
+  promocion   Promocion   @relation(fields: [promocionId], references: [id], onDelete: Cascade)
+  regla       ReglaNegocio @relation(fields: [reglaId], references: [id], onDelete: Cascade)
+  
+  fechaCreacion DateTime  @default(now())
+
+  @@unique([promocionId, reglaId])
+  @@map("promocion_reglas")
+}
+
+// ==================== SPRINT 4: NOTIFICACIONES ====================
+
+model Notificacion {
+  id              String              @id @default(uuid())
+  clienteId       String?
+  promocionId     String?
+  canal           CanalNotificacion
+  estado          EstadoNotificacion  @default(PENDIENTE)
+  titulo          String?
+  mensaje         String
+  metadata        Json?               // Datos adicionales (webhook responses, etc.)
+  
+  // Tracking
+  fechaEnviado    DateTime?
+  fechaEntregado  DateTime?
+  fechaLeido      DateTime?
+  fechaFallido    DateTime?
+  mensajeError    String?
+  
+  cliente         Cliente?    @relation(fields: [clienteId], references: [id], onDelete: SetNull)
+  promocion       Promocion?  @relation(fields: [promocionId], references: [id], onDelete: SetNull)
+  
+  fechaCreacion   DateTime    @default(now())
+  fechaActualizacion DateTime @updatedAt
+
+  @@index([estado])
+  @@index([canal])
+  @@index([clienteId])
+  @@index([fechaCreacion])
+  @@map("notificaciones")
+}
+
+enum CanalNotificacion {
+  SMS
+  WHATSAPP
+  CORREO
+}
+
+enum EstadoNotificacion {
+  PENDIENTE
+  EN_COLA
+  ENVIADA
+  ENTREGADA
+  FALLIDA
+  CANCELADA
+}
+
+// ==================== CONFIGURACIÓN ====================
+
+model ConfiguracionSistema {
+  id                 String   @id @default(uuid())
+  clave              String   @unique
+  valor              Json
+  categoria          String   // 'api', 'notificacion', 'seguridad', 'general'
+  activa             Boolean  @default(true)
+  
+  fechaCreacion      DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+
+  @@map("configuraciones_sistema")
+}
+
+// ==================== REPORTES ====================
+
+model Reporte {
+  id               String     @id @default(uuid())
+  tipo             TipoReporte
+  parametros       Json       // Parámetros del reporte
+  datos            Json?      // Datos del reporte (cache)
+  fechaGeneracion  DateTime   @default(now())
+  generadoPor      String?    // Usuario ID
+  
+  fechaCreacion    DateTime   @default(now())
+
+  @@index([tipo])
+  @@index([fechaGeneracion])
+  @@map("reportes")
+}
+
+enum TipoReporte {
+  ESTADISTICAS_CLIENTES
+  RENDIMIENTO_PROMOCIONES
+  HISTORIAL_NOTIFICACIONES
+  TASA_CONVERSION
+  ANALISIS_INGRESOS
+}

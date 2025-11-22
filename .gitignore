@@ -1,0 +1,85 @@
+# Dependencias
+node_modules/
+.pnp
+.pnp.js
+
+# Producción
+build/
+dist/
+*.tsbuildinfo
+
+# Variables de entorno
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.test
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+combined.log
+error.log
+
+# Archivos del sistema
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs y editores
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Prisma
+.prisma/
+
+# Base de datos
+*.sqlite
+*.sqlite3
+*.db
+
+# Cache
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist/
+
+# Temporales
+*.tmp
+*.temp
+tmp/
+temp/
+
+# OS específicos
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# TypeScript
+*.tsbuildinfo
+
+# Archivos de documentación temporal (opcional - si quieres ignorarlos)
+# DOCUMENTACION_CONSOLIDADA.md
+
