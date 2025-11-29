@@ -324,6 +324,174 @@ touch src/components/Feature.tsx
 
 ---
 
+## 🔄 Workflows Principales del Sistema
+
+### 1. Crear y Lanzar Campaña de Promoción
+
+```
+1. Usuario crea productos (si no existen)
+   → Frontend: PromotionManagement
+   → POST /api/v1/products
+   ↓
+2. Usuario crea promoción y asocia productos
+   → Frontend: Modal "Nueva Promoción"
+   → POST /api/v1/promotions
+   ↓
+3. Usuario configura reglas de elegibilidad (opcional)
+   → Backend: RuleEngineService.evaluateEligibility()
+   → POST /api/v1/rules/assign
+   ↓
+4. Usuario activa la promoción
+   → POST /api/v1/promotions/:id/activate
+   → Estado cambia a ACTIVA
+   ↓
+5. Usuario envía notificaciones masivas desde MessageCenter
+   → Frontend: MessageCenter → "Envío Masivo"
+   → POST /api/v1/notifications/bulk
+   ↓
+6. Sistema evalúa reglas y filtra clientes elegibles
+   → Backend: RuleEngineService
+   → Filtra por condiciones configuradas
+   ↓
+7. Sistema encola notificaciones en Bull/Redis
+   → NotificationService.sendBulk()
+   → Crea jobs en Bull queue
+   ↓
+8. Workers procesan cola y envían vía Twilio/Nodemailer
+   → NotificationJob procesa cada mensaje
+   → Actualiza estado: ENVIADA, ENTREGADA, FALLIDA
+   ↓
+9. Sistema actualiza estados y estadísticas
+   → Incrementa totalEnviados
+   → Actualiza conversiones
+   ↓
+10. Usuario monitorea resultados en Dashboard y Reports
+    → GET /api/v1/promotions/:id/statistics
+    → Gráficos de conversión en tiempo real
+```
+
+### 2. Autenticación de Usuario
+
+```
+1. Usuario ingresa credenciales en Login
+   → Frontend: Login.tsx
+   → Form con correo y contraseña
+   ↓
+2. Frontend envía POST /api/v1/auth/login
+   → Body: { correo, contrasena }
+   → Axios interceptor NO agrega token (ruta pública)
+   ↓
+3. Backend valida credenciales (bcrypt)
+   → AuthController.login()
+   → AuthService.login()
+   → Compara hash con bcrypt.compare()
+   ↓
+4. Backend genera access token (1h) y refresh token (7d)
+   → jwt.sign() con JWT_SECRET
+   → Tokens incluyen: id, correo, rol
+   ↓
+5. Frontend almacena tokens en localStorage
+   → localStorage.setItem('accessToken', ...)
+   → localStorage.setItem('refreshToken', ...)
+   ↓
+6. Axios interceptor agrega token a todas las requests
+   → config.headers.Authorization = `Bearer ${token}`
+   → Automático en todas las peticiones
+   ↓
+7. Antes de expirar, frontend solicita refresh token
+   → POST /api/v1/auth/refresh
+   → Body: { refreshToken }
+   ↓
+8. Backend valida refresh token y emite nuevo access token
+   → Verifica firma con JWT_REFRESH_SECRET
+   → Genera nuevo accessToken
+```
+
+### 3. Gestión de Clientes
+
+```
+1. Usuario accede a ClientManagement
+   → Frontend: Navbar → "Clientes"
+   → Componente ClientManagement.tsx se monta
+   ↓
+2. Componente carga clientes (GET /api/v1/clients)
+   → useEffect se ejecuta
+   → clientService.getAll({ pagina: 1, limite: 10 })
+   ↓
+3. Usuario aplica filtros/búsqueda
+   → Input de búsqueda (debounce 300ms)
+   → Select de estado (ACTIVO/INACTIVO)
+   → Paginación
+   ↓
+4. Usuario crea/edita/elimina cliente
+   → Modal con formulario
+   → Validación en frontend (React Hook Form)
+   ↓
+5. Backend valida datos con Zod
+   → ValidationMiddleware
+   → createClientSchema.parse(req.body)
+   ↓
+6. Backend guarda en PostgreSQL vía Prisma
+   → ClientService.create()
+   → prisma.cliente.create()
+   ↓
+7. Backend invalida caché de estadísticas
+   → cacheService.del('client:statistics')
+   → Asegura datos frescos
+   ↓
+8. Frontend actualiza lista
+   → Refetch de datos
+   → UI se actualiza automáticamente
+```
+
+### 4. Envío de Notificaciones Masivas
+
+```
+1. Usuario selecciona promoción en MessageCenter
+   → Frontend: MessageCenter.tsx
+   → Select con lista de promociones activas
+   ↓
+2. Usuario configura canal (SMS/Email/WhatsApp) y mensaje
+   → Radio buttons para canal
+   → Textarea para mensaje (puede usar variables)
+   ↓
+3. Frontend envía POST /api/v1/notifications/bulk
+   → Body: { promocionId, canal, mensaje }
+   → AuthMiddleware valida token
+   ↓
+4. Backend obtiene clientes elegibles de la promoción
+   → PromotionService.getEligibleClients()
+   → Evalúa reglas de negocio asociadas
+   ↓
+5. Backend crea registros de Notificacion (estado: EN_COLA)
+   → prisma.notificacion.createMany()
+   → Un registro por cada cliente elegible
+   ↓
+6. Backend encola jobs en Bull/Redis
+   → notificationQueue.add('send-notification', { ... })
+   → Configuración: attempts: 3, backoff
+   ↓
+7. Workers procesan jobs en background
+   → NotificationJob.process()
+   → Procesa de forma asíncrona
+   ↓
+8. Workers llaman a Twilio (SMS) o Nodemailer (Email)
+   → twilioService.sendSMS() o emailService.sendEmail()
+   → Manejo de errores y reintentos
+   ↓
+9. Workers actualizan estado de Notificacion
+   → prisma.notificacion.update()
+   → Estado: ENVIADA, ENTREGADA, FALLIDA
+   → Guarda mensajeError si falla
+   ↓
+10. Usuario ve progreso en Historial de MessageCenter
+    → GET /api/v1/notifications/history
+    → Filtros por canal, estado, fecha
+    → Paginación de resultados
+```
+
+---
+
 ## 🐛 Debugging
 
 ### Backend
@@ -468,6 +636,6 @@ npm run build
 
 ---
 
-**Última actualización**: Diciembre 2024  
+**Última actualización**: Noviembre 2025  
 **Versión**: 1.0.0
 

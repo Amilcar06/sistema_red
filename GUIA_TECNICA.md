@@ -597,6 +597,6 @@ Todos los endpoints de listado soportan:
 
 ---
 
-**Última actualización**: Diciembre 2024  
+**Última actualización**: Noviembre 2025
 **Versión**: 1.0.0
 

@@ -77,7 +77,7 @@ Sistema completo de gestión de promociones para empresas de telefonía móvil, 
 - Redis (para colas y caché)
 - npm o yarn
 
-### Instalación
+### Instalación Completa
 
 #### 1. Clonar el repositorio
 ```bash
@@ -85,7 +85,7 @@ git clone <repository-url>
 cd "Sistema de Promoción de Servicios"
 ```
 
-#### 2. Backend
+#### 2. Configurar Backend
 
 ```bash
 cd backend
@@ -95,8 +95,35 @@ npm install
 
 # Configurar variables de entorno
 cp .env.example .env
-# Editar .env con tus credenciales
+```
 
+**Editar `backend/.env` con tus credenciales**:
+```env
+# Base de Datos
+DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+
+# JWT
+JWT_SECRET="tu-secret-jwt"
+JWT_REFRESH_SECRET="tu-refresh-secret"
+
+# Redis
+REDIS_HOST="localhost"
+REDIS_PORT=6379
+
+# Twilio (SMS) - Opcional
+TWILIO_ACCOUNT_SID=""
+TWILIO_AUTH_TOKEN=""
+TWILIO_PHONE_NUMBER=""
+
+# SMTP (Email)
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT=587
+SMTP_USER=""
+SMTP_PASS=""
+```
+
+**Configurar Base de Datos**:
+```bash
 # Generar cliente Prisma
 npm run prisma:generate
 
@@ -105,15 +132,26 @@ npm run prisma:migrate
 
 # (Opcional) Poblar base de datos
 npm run prisma:seed              # Seed básico (usuarios admin/operador)
-npm run prisma:seed:entel        # Seed educativo completo (inspirado en Entel Bolivia)
+npm run prisma:seed:entel        # Seed educativo completo con 30 clientes, 14 productos, 5 promociones
+```
 
-# Iniciar servidor en desarrollo
+**Iniciar servidor de desarrollo**:
+```bash
 npm run dev
 ```
 
 El backend estará disponible en `http://localhost:3001`
 
-#### 3. Frontend
+**Verificar funcionamiento**:
+```bash
+# Health check
+curl http://localhost:3001/health
+
+# Ver base de datos en Prisma Studio
+npm run prisma:studio
+```
+
+#### 3. Configurar Frontend
 
 ```bash
 cd frontend
@@ -121,11 +159,39 @@ cd frontend
 # Instalar dependencias
 npm install
 
-# Iniciar servidor de desarrollo
+# Configurar variables de entorno
+cp .env.example .env
+```
+
+**Editar `frontend/.env`**:
+```env
+VITE_API_URL=http://localhost:3001/api/v1
+```
+
+**Iniciar servidor de desarrollo**:
+```bash
 npm run dev
 ```
 
 El frontend estará disponible en `http://localhost:3000`
+
+#### 4. Acceder al Sistema
+
+- **URL**: `http://localhost:3000`
+- **Usuario (seed educativo)**: `admin@entel-educativo.bo`
+- **Contraseña**: `admin123`
+
+O crea tu propio usuario vía API:
+```bash
+curl -X POST http://localhost:3001/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "correo": "tuusuario@example.com",
+    "contrasena": "tupassword",
+    "nombre": "Tu Nombre",
+    "rol": "ADMIN"
+  }'
+```
 
 ---
 
@@ -183,10 +249,11 @@ VITE_API_URL=http://localhost:3001/api/v1
 
 ## 📚 Documentación Adicional
 
-- **[GUIA_TECNICA.md](./GUIA_TECNICA.md)** - Arquitectura, estructura, APIs
-- **[GUIA_DESARROLLO.md](./GUIA_DESARROLLO.md)** - Testing, desarrollo, buenas prácticas
-- **[ANALISIS_MERCADO_BOLIVIA.md](./ANALISIS_MERCADO_BOLIVIA.md)** - Análisis de mercado para operadoras en Bolivia
-- **[SEED_EDUCATIVO_ENTEL.md](./SEED_EDUCATIVO_ENTEL.md)** - Seed educativo con datos inspirados en Entel Bolivia
+Este proyecto cuenta con 4 archivos principales de documentación:
+
+- **[GUIA_TECNICA.md](./GUIA_TECNICA.md)** - Arquitectura del sistema, stack tecnológico detallado, modelo de base de datos, API REST completa, seguridad, optimizaciones, servicios y componentes
+- **[GUIA_DESARROLLO.md](./GUIA_DESARROLLO.md)** - Setup de desarrollo, testing (Jest + Vitest), estándares de código, workflows principales, debugging, buenas prácticas y despliegue
+- **[RECURSOS_BOLIVIA.md](./RECURSOS_BOLIVIA.md)** - Análisis de mercado boliviano, casos de uso específicos para operadoras (Entel, Tigo, Viva), seed educativo con datos de demostración
 
 ---
 
@@ -361,7 +428,7 @@ Sistema desarrollado siguiendo metodología SCRUM y mejores prácticas de desarr
 
 ---
 
-**Última actualización**: Diciembre 2024  
+**Última actualización**: Noviembre 2025  
 **Versión**: 1.0.0  
 **Estado**: ✅ Producción
 
