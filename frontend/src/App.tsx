@@ -7,9 +7,10 @@ import { ClientManagement } from './components/ClientManagement';
 import { PromotionManagement } from './components/PromotionManagement';
 import { MessageCenter } from './components/MessageCenter';
 import { Reports } from './components/Reports';
+import RuleManagement from './components/RuleManagement';
 import { Settings } from './components/Settings';
 
-type View = 'dashboard' | 'clients' | 'promotions' | 'messages' | 'reports' | 'settings';
+type View = 'dashboard' | 'clients' | 'promotions' | 'messages' | 'reports' | 'rules' | 'settings';
 
 function AppContent() {
   const [currentView, setCurrentView] = useState<View>('dashboard');
@@ -27,6 +28,8 @@ function AppContent() {
         return <MessageCenter />;
       case 'reports':
         return <Reports />;
+      case 'rules':
+        return <RuleManagement />;
       case 'settings':
         return <Settings />;
       default:
@@ -36,8 +39,8 @@ function AppContent() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar 
-        currentView={currentView} 
+      <Sidebar
+        currentView={currentView}
         onViewChange={setCurrentView}
         user={user}
         onLogout={logout}

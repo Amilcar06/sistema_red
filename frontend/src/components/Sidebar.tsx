@@ -2,7 +2,7 @@ import React from 'react';
 import { LayoutDashboard, Users, Tag, MessageSquare, BarChart3, Settings, Smartphone, LogOut, User } from 'lucide-react';
 import { User as UserType } from '../services/auth.service';
 
-type View = 'dashboard' | 'clients' | 'promotions' | 'messages' | 'reports' | 'settings';
+type View = 'dashboard' | 'clients' | 'promotions' | 'messages' | 'reports' | 'rules' | 'settings';
 
 interface SidebarProps {
   currentView: View;
@@ -18,6 +18,7 @@ export function Sidebar({ currentView, onViewChange, user, onLogout }: SidebarPr
     { id: 'promotions' as View, label: 'Promociones', icon: Tag },
     { id: 'messages' as View, label: 'Mensajería', icon: MessageSquare },
     { id: 'reports' as View, label: 'Reportes', icon: BarChart3 },
+    { id: 'rules' as View, label: 'Reglas de Negocio', icon: Tag },
     { id: 'settings' as View, label: 'Configuración', icon: Settings },
   ];
 
@@ -41,11 +42,10 @@ export function Sidebar({ currentView, onViewChange, user, onLogout }: SidebarPr
             <button
               key={item.id}
               onClick={() => onViewChange(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                isActive
-                  ? 'bg-white text-blue-600 shadow-lg'
-                  : 'text-blue-100 hover:bg-blue-700'
-              }`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
+                ? 'bg-white text-blue-600 shadow-lg'
+                : 'text-blue-100 hover:bg-blue-700'
+                }`}
             >
               <Icon className="w-5 h-5" />
               <span>{item.label}</span>

@@ -1,4 +1,4 @@
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, Users, Megaphone, MessageSquare, Package } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from './ui/utils';
 
@@ -54,7 +54,7 @@ export function EmptyState({
 export function EmptyClients({ onCreate }: { onCreate: () => void }) {
   return (
     <EmptyState
-      icon={require('lucide-react').Users}
+      icon={Users}
       title="No hay clientes"
       description="Comienza agregando tu primer cliente a la base de datos."
       action={{
@@ -68,7 +68,7 @@ export function EmptyClients({ onCreate }: { onCreate: () => void }) {
 export function EmptyPromotions({ onCreate }: { onCreate: () => void }) {
   return (
     <EmptyState
-      icon={require('lucide-react').Megaphone}
+      icon={Megaphone}
       title="No hay promociones"
       description="Crea tu primera promoción para comenzar a enviar mensajes a tus clientes."
       action={{
@@ -82,7 +82,7 @@ export function EmptyPromotions({ onCreate }: { onCreate: () => void }) {
 export function EmptyMessages() {
   return (
     <EmptyState
-      icon={require('lucide-react').MessageSquare}
+      icon={MessageSquare}
       title="No hay mensajes enviados"
       description="El historial de mensajes aparecerá aquí una vez que comiences a enviar notificaciones."
     />
@@ -92,7 +92,7 @@ export function EmptyMessages() {
 export function EmptyProducts({ onCreate }: { onCreate: () => void }) {
   return (
     <EmptyState
-      icon={require('lucide-react').Package}
+      icon={Package}
       title="No hay productos"
       description="Agrega productos para asociarlos con promociones."
       action={{

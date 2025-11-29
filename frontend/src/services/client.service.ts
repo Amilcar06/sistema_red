@@ -22,7 +22,7 @@ export interface CreateClientData {
   estado?: 'ACTIVO' | 'INACTIVO' | 'SUSPENDIDO';
 }
 
-export interface UpdateClientData extends Partial<CreateClientData> {}
+export interface UpdateClientData extends Partial<CreateClientData> { }
 
 export interface ClientFilters {
   search?: string;
@@ -45,12 +45,12 @@ export interface ClientStatistics {
 class ClientService {
   async findAll(filters: ClientFilters = {}): Promise<PaginatedResponse<Client>> {
     const params = new URLSearchParams();
-    
-    if (filters.search) params.append('search', filters.search);
-    if (filters.estado) params.append('status', filters.estado);
+
+    if (filters.search) params.append('busqueda', filters.search);
+    if (filters.estado) params.append('estado', filters.estado);
     if (filters.plan) params.append('plan', filters.plan);
-    if (filters.page) params.append('page', filters.page.toString());
-    if (filters.limit) params.append('limit', filters.limit.toString());
+    if (filters.page) params.append('pagina', filters.page.toString());
+    if (filters.limit) params.append('limite', filters.limit.toString());
 
     const response = await apiClient.get<ApiResponse<any>>(
       `/clients?${params.toString()}`
@@ -65,7 +65,7 @@ class ClientService {
         total: 0,
         totalPaginas: 0,
       };
-      
+
       return {
         data: backendData,
         pagination: {

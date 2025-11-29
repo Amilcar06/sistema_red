@@ -67,7 +67,7 @@ export function PromotionManagement() {
       setError(null);
       const filters: any = {};
       if (filterStatus !== 'all') filters.estado = filterStatus;
-      
+
       const response = await promotionService.findAll(filters);
       setPromotions(response.data || []);
     } catch (err: any) {
@@ -107,7 +107,7 @@ export function PromotionManagement() {
       'paused': { label: 'Pausada', className: 'bg-yellow-100 text-yellow-800' },
       'ended': { label: 'Finalizada', className: 'bg-gray-100 text-gray-800' },
     };
-    
+
     const status = statusMap[estado] || { label: estado, className: 'bg-gray-100 text-gray-800' };
     return status;
   };
@@ -235,6 +235,30 @@ export function PromotionManagement() {
   const activePromotions = promotions.filter((p) => p.estado === 'ACTIVA').length;
   const totalSent = promotions.reduce((acc, p) => acc + p.totalEnviados, 0);
   const totalConverted = promotions.reduce((acc, p) => acc + p.totalConvertidos, 0);
+
+  // Formatear segmento
+  const formatSegment = (segment: string | undefined) => {
+    if (!segment) return 'Todos';
+
+    try {
+      // Intentar parsear si es JSON
+      const parsed = JSON.parse(segment);
+
+      // Si es un objeto, formatearlo
+      if (typeof parsed === 'object' && parsed !== null) {
+        return Object.entries(parsed).map(([key, value]) => {
+          const label = key.charAt(0).toUpperCase() + key.slice(1);
+          const val = Array.isArray(value) ? value.join(', ') : String(value);
+          return `${label}: ${val}`;
+        }).join(' | ');
+      }
+
+      return segment;
+    } catch (e) {
+      // Si no es JSON válido, devolver el texto original
+      return segment;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -482,7 +506,7 @@ export function PromotionManagement() {
                     </div>
                     <div>
                       <div className="text-gray-600 text-sm mb-1">Segmento</div>
-                      <div>{promo.segmentoObjetivo || 'Todos'}</div>
+                      <div>{formatSegment(promo.segmentoObjetivo)}</div>
                     </div>
                     <div>
                       <div className="text-gray-600 text-sm mb-1">Enviados</div>
