@@ -5,12 +5,13 @@ import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { ClientManagement } from './components/ClientManagement';
 import { PromotionManagement } from './components/PromotionManagement';
+import { ProductManagement } from './components/ProductManagement';
 import { MessageCenter } from './components/MessageCenter';
 import { Reports } from './components/Reports';
 import RuleManagement from './components/RuleManagement';
 import { Settings } from './components/Settings';
 
-type View = 'dashboard' | 'clients' | 'promotions' | 'messages' | 'reports' | 'rules' | 'settings';
+type View = 'dashboard' | 'clients' | 'promotions' | 'products' | 'messages' | 'reports' | 'rules' | 'settings';
 
 function AppContent() {
   const [currentView, setCurrentView] = useState<View>('dashboard');
@@ -24,6 +25,8 @@ function AppContent() {
         return <ClientManagement />;
       case 'promotions':
         return <PromotionManagement />;
+      case 'products':
+        return <ProductManagement />;
       case 'messages':
         return <MessageCenter />;
       case 'reports':

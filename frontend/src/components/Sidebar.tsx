@@ -1,8 +1,8 @@
 import React from 'react';
-import { LayoutDashboard, Users, Tag, MessageSquare, BarChart3, Settings, Smartphone, LogOut, User } from 'lucide-react';
+import { LayoutDashboard, Users, MessageSquare, BarChart3, Settings, Smartphone, LogOut, User, Megaphone, Package, FileJson } from 'lucide-react';
 import { User as UserType } from '../services/auth.service';
 
-type View = 'dashboard' | 'clients' | 'promotions' | 'messages' | 'reports' | 'rules' | 'settings';
+type View = 'dashboard' | 'clients' | 'promotions' | 'products' | 'messages' | 'reports' | 'rules' | 'settings';
 
 interface SidebarProps {
   currentView: View;
@@ -15,10 +15,11 @@ export function Sidebar({ currentView, onViewChange, user, onLogout }: SidebarPr
   const menuItems = [
     { id: 'dashboard' as View, label: 'Dashboard', icon: LayoutDashboard },
     { id: 'clients' as View, label: 'Clientes', icon: Users },
-    { id: 'promotions' as View, label: 'Promociones', icon: Tag },
+    { id: 'promotions' as View, label: 'Promociones', icon: Megaphone },
+    { id: 'products' as View, label: 'Productos', icon: Package },
     { id: 'messages' as View, label: 'Mensajería', icon: MessageSquare },
     { id: 'reports' as View, label: 'Reportes', icon: BarChart3 },
-    { id: 'rules' as View, label: 'Reglas de Negocio', icon: Tag },
+    { id: 'rules' as View, label: 'Reglas de Negocio', icon: FileJson },
     { id: 'settings' as View, label: 'Configuración', icon: Settings },
   ];
 

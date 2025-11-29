@@ -16,6 +16,7 @@ import {
 } from './ui/select';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
+import settingsService, { Setting } from '../services/settings.service';
 
 export function Settings() {
   const { user, refreshUser } = useAuth();
@@ -64,23 +65,92 @@ export function Settings() {
     twoFactorEnabled: false,
   });
 
+  // Cargar configuración inicial
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        setIsLoading(true);
+        const data = await settingsService.getAll();
+
+        // Mapear datos del backend a los estados locales
+        if (data) {
+          // Configuración General
+          setGeneralConfig(prev => ({
+            ...prev,
+            companyName: data.companyName || prev.companyName,
+            timezone: data.timezone || prev.timezone,
+            language: data.language || prev.language,
+            currency: data.currency || prev.currency,
+            dailyLimit: data.dailyLimit || prev.dailyLimit,
+            hourlyLimit: data.hourlyLimit || prev.hourlyLimit,
+          }));
+
+          // Configuración API
+          setApiConfig(prev => ({
+            ...prev,
+            twilioSid: data.twilioSid || '',
+            twilioToken: data.twilioToken || '',
+            twilioNumber: data.twilioNumber || '',
+            whatsappToken: data.whatsappToken || '',
+            whatsappPhoneId: data.whatsappPhoneId || '',
+            smtpHost: data.smtpHost || '',
+            smtpPort: data.smtpPort || '',
+            smtpUser: data.smtpUser || '',
+            smtpPass: data.smtpPass || '',
+          }));
+
+          // Preferencias Notificaciones
+          setNotificationPrefs(prev => ({
+            ...prev,
+            campaignNotifications: data.campaignNotifications ?? prev.campaignNotifications,
+            conversionAlerts: data.conversionAlerts ?? prev.conversionAlerts,
+            dailyReports: data.dailyReports ?? prev.dailyReports,
+            errorAlerts: data.errorAlerts ?? prev.errorAlerts,
+            notificationEmail: data.notificationEmail || user?.correo || '',
+          }));
+        }
+      } catch (err) {
+        console.error('Error loading settings:', err);
+        // No mostrar error al usuario en carga inicial para no ser intrusivo
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSettings();
+  }, [user]);
+
+  const saveSettings = async (settings: Setting[], successMessage: string) => {
+    try {
+      await settingsService.update(settings);
+      toast.success(successMessage);
+      setSuccess(successMessage);
+    } catch (err: any) {
+      const errorMessage = err.message || 'Error al guardar configuración';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    }
+  };
+
   const handleSaveApiConfig = async () => {
     setIsSaving(true);
     setSuccess(null);
     setError(null);
 
-    try {
-      // TODO: Implementar endpoint de configuración en backend
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Simulación
-      toast.success('Configuración de APIs guardada');
-      setSuccess('Configuración guardada correctamente');
-    } catch (err: any) {
-      const errorMessage = err.message || 'Error al guardar configuración';
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setIsSaving(false);
-    }
+    const settingsToSave: Setting[] = [
+      { clave: 'twilioSid', valor: apiConfig.twilioSid, categoria: 'api' },
+      { clave: 'twilioToken', valor: apiConfig.twilioToken, categoria: 'api' },
+      { clave: 'twilioNumber', valor: apiConfig.twilioNumber, categoria: 'api' },
+      { clave: 'whatsappToken', valor: apiConfig.whatsappToken, categoria: 'api' },
+      { clave: 'whatsappPhoneId', valor: apiConfig.whatsappPhoneId, categoria: 'api' },
+      { clave: 'smtpHost', valor: apiConfig.smtpHost, categoria: 'api' },
+      { clave: 'smtpPort', valor: apiConfig.smtpPort, categoria: 'api' },
+      { clave: 'smtpUser', valor: apiConfig.smtpUser, categoria: 'api' },
+      { clave: 'smtpPass', valor: apiConfig.smtpPass, categoria: 'api' },
+    ];
+
+    await saveSettings(settingsToSave, 'Configuración de APIs guardada');
+    setIsSaving(false);
   };
 
   const handleSaveNotificationPrefs = async () => {
@@ -88,18 +158,16 @@ export function Settings() {
     setSuccess(null);
     setError(null);
 
-    try {
-      // TODO: Implementar endpoint de preferencias en backend
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Simulación
-      toast.success('Preferencias de notificaciones guardadas');
-      setSuccess('Preferencias guardadas correctamente');
-    } catch (err: any) {
-      const errorMessage = err.message || 'Error al guardar preferencias';
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setIsSaving(false);
-    }
+    const settingsToSave: Setting[] = [
+      { clave: 'campaignNotifications', valor: notificationPrefs.campaignNotifications, categoria: 'notificaciones' },
+      { clave: 'conversionAlerts', valor: notificationPrefs.conversionAlerts, categoria: 'notificaciones' },
+      { clave: 'dailyReports', valor: notificationPrefs.dailyReports, categoria: 'notificaciones' },
+      { clave: 'errorAlerts', valor: notificationPrefs.errorAlerts, categoria: 'notificaciones' },
+      { clave: 'notificationEmail', valor: notificationPrefs.notificationEmail, categoria: 'notificaciones' },
+    ];
+
+    await saveSettings(settingsToSave, 'Preferencias de notificaciones guardadas');
+    setIsSaving(false);
   };
 
   const handleSaveSecurity = async () => {
@@ -117,9 +185,11 @@ export function Settings() {
     setSuccess(null);
     setError(null);
 
+    // Nota: La seguridad se maneja diferente, usualmente con un endpoint específico de cambio de contraseña
+    // Por ahora simularemos que se guarda como configuración, pero idealmente debería ser authService.changePassword
     try {
-      // TODO: Implementar endpoint de cambio de contraseña en backend
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Simulación
+      // Simulación por ahora
+      await new Promise((resolve) => setTimeout(resolve, 500));
       toast.success('Configuración de seguridad actualizada');
       setSuccess('Configuración de seguridad actualizada correctamente');
       setSecurity({
@@ -142,30 +212,18 @@ export function Settings() {
     setSuccess(null);
     setError(null);
 
-    try {
-      // TODO: Implementar endpoint de configuración general en backend
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Simulación
-      toast.success('Configuración general guardada');
-      setSuccess('Configuración general guardada correctamente');
-    } catch (err: any) {
-      const errorMessage = err.message || 'Error al guardar configuración';
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setIsSaving(false);
-    }
-  };
+    const settingsToSave: Setting[] = [
+      { clave: 'companyName', valor: generalConfig.companyName, categoria: 'general' },
+      { clave: 'timezone', valor: generalConfig.timezone, categoria: 'general' },
+      { clave: 'language', valor: generalConfig.language, categoria: 'general' },
+      { clave: 'currency', valor: generalConfig.currency, categoria: 'general' },
+      { clave: 'dailyLimit', valor: generalConfig.dailyLimit, categoria: 'general' },
+      { clave: 'hourlyLimit', valor: generalConfig.hourlyLimit, categoria: 'general' },
+    ];
 
-  // Cargar configuración actual (si hay endpoint)
-  useEffect(() => {
-    // TODO: Cargar configuración desde backend cuando exista endpoint
-    if (user?.correo) {
-      setNotificationPrefs((prev) => ({
-        ...prev,
-        notificationEmail: user.correo,
-      }));
-    }
-  }, [user]);
+    await saveSettings(settingsToSave, 'Configuración general guardada');
+    setIsSaving(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -364,8 +422,9 @@ export function Settings() {
                   <Label htmlFor="twilio-sid">Account SID</Label>
                   <Input
                     id="twilio-sid"
-                    placeholder="Configurado en .env del backend"
-                    disabled
+                    placeholder="AC..."
+                    value={apiConfig.twilioSid}
+                    onChange={(e) => setApiConfig({ ...apiConfig, twilioSid: e.target.value })}
                     className="mt-2"
                   />
                 </div>
@@ -374,8 +433,9 @@ export function Settings() {
                   <Input
                     id="twilio-token"
                     type="password"
-                    placeholder="Configurado en .env del backend"
-                    disabled
+                    placeholder="Token..."
+                    value={apiConfig.twilioToken}
+                    onChange={(e) => setApiConfig({ ...apiConfig, twilioToken: e.target.value })}
                     className="mt-2"
                   />
                 </div>
@@ -383,8 +443,9 @@ export function Settings() {
                   <Label htmlFor="twilio-number">Número de Teléfono</Label>
                   <Input
                     id="twilio-number"
-                    placeholder="Configurado en .env del backend"
-                    disabled
+                    placeholder="+1234567890"
+                    value={apiConfig.twilioNumber}
+                    onChange={(e) => setApiConfig({ ...apiConfig, twilioNumber: e.target.value })}
                     className="mt-2"
                   />
                 </div>
@@ -397,8 +458,9 @@ export function Settings() {
                   <Input
                     id="whatsapp-token"
                     type="password"
-                    placeholder="Configurado en .env del backend"
-                    disabled
+                    placeholder="Token..."
+                    value={apiConfig.whatsappToken}
+                    onChange={(e) => setApiConfig({ ...apiConfig, whatsappToken: e.target.value })}
                     className="mt-2"
                   />
                 </div>
@@ -406,8 +468,9 @@ export function Settings() {
                   <Label htmlFor="whatsapp-phone">Phone Number ID</Label>
                   <Input
                     id="whatsapp-phone"
-                    placeholder="Configurado en .env del backend"
-                    disabled
+                    placeholder="ID..."
+                    value={apiConfig.whatsappPhoneId}
+                    onChange={(e) => setApiConfig({ ...apiConfig, whatsappPhoneId: e.target.value })}
                     className="mt-2"
                   />
                 </div>
@@ -420,8 +483,9 @@ export function Settings() {
                     <Label htmlFor="smtp-host">SMTP Host</Label>
                     <Input
                       id="smtp-host"
-                      placeholder="Configurado en .env del backend"
-                      disabled
+                      placeholder="smtp.example.com"
+                      value={apiConfig.smtpHost}
+                      onChange={(e) => setApiConfig({ ...apiConfig, smtpHost: e.target.value })}
                       className="mt-2"
                     />
                   </div>
@@ -429,8 +493,9 @@ export function Settings() {
                     <Label htmlFor="smtp-port">Puerto</Label>
                     <Input
                       id="smtp-port"
-                      placeholder="Configurado en .env del backend"
-                      disabled
+                      placeholder="587"
+                      value={apiConfig.smtpPort}
+                      onChange={(e) => setApiConfig({ ...apiConfig, smtpPort: e.target.value })}
                       className="mt-2"
                     />
                   </div>
@@ -440,12 +505,41 @@ export function Settings() {
                   <Input
                     id="smtp-user"
                     type="email"
-                    placeholder="Configurado en .env del backend"
-                    disabled
+                    placeholder="user@example.com"
+                    value={apiConfig.smtpUser}
+                    onChange={(e) => setApiConfig({ ...apiConfig, smtpUser: e.target.value })}
+                    className="mt-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="smtp-pass">Contraseña</Label>
+                  <Input
+                    id="smtp-pass"
+                    type="password"
+                    placeholder="********"
+                    value={apiConfig.smtpPass}
+                    onChange={(e) => setApiConfig({ ...apiConfig, smtpPass: e.target.value })}
                     className="mt-2"
                   />
                 </div>
               </div>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={handleSaveApiConfig}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Guardando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Guardar Configuración de APIs
+                  </>
+                )}
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
