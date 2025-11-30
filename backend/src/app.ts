@@ -5,6 +5,8 @@ import { errorHandler } from './middleware/error.middleware';
 import { loggerMiddleware } from './middleware/logger.middleware';
 import routes from './routes';
 import { apiLimiter } from './middleware/rateLimit.middleware';
+import swaggerUi from 'swagger-ui-express';
+import { specs } from './config/swagger';
 
 dotenv.config();
 
@@ -33,6 +35,9 @@ app.use(`/api/${process.env.API_VERSION || 'v1'}`, apiLimiter);
 
 // Routes
 app.use(`/api/${process.env.API_VERSION || 'v1'}`, routes);
+
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Error handling
 app.use(errorHandler);

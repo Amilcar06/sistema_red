@@ -9,6 +9,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
     DialogTrigger,
     DialogFooter,
 } from './ui/dialog';
@@ -140,6 +141,9 @@ export function ProductManagement() {
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>Crear Nuevo Producto</DialogTitle>
+                            <DialogDescription>
+                                Ingrese los detalles del nuevo producto o servicio.
+                            </DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleCreate} className="space-y-4">
                             <div>
@@ -247,6 +251,9 @@ export function ProductManagement() {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Editar Producto</DialogTitle>
+                        <DialogDescription>
+                            Modifique los detalles del producto seleccionado.
+                        </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleUpdate} className="space-y-4">
                         <div>

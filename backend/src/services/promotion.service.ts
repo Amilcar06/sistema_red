@@ -18,7 +18,7 @@ class PromotionService {
     // Validar fechas
     const fechaInicio = new Date(data.fechaInicio);
     const fechaFin = new Date(data.fechaFin);
-    
+
     if (fechaFin <= fechaInicio) {
       throw new AppError('La fecha de fin debe ser posterior a la de inicio', 400);
     }
@@ -135,8 +135,8 @@ class PromotionService {
   async activate(id: string) {
     const promocion = await this.findById(id);
 
-    if (promocion.estado !== 'BORRADOR') {
-      throw new AppError('Solo se pueden activar promociones en borrador', 400);
+    if (promocion.estado !== 'BORRADOR' && promocion.estado !== 'PAUSADA') {
+      throw new AppError('Solo se pueden activar promociones en borrador o pausadas', 400);
     }
 
     if (new Date() > promocion.fechaFin) {

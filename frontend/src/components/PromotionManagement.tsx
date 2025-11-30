@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from './ui/dialog';
 import { Label } from './ui/label';
@@ -279,6 +280,9 @@ export function PromotionManagement() {
               <DialogTitle>
                 {editingPromotion ? 'Editar Promoción' : 'Crear Nueva Promoción'}
               </DialogTitle>
+              <DialogDescription>
+                Complete el formulario para {editingPromotion ? 'editar la' : 'crear una nueva'} promoción.
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <div>

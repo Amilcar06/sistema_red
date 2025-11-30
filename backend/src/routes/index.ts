@@ -7,6 +7,8 @@ import notificationRoutes from './notification.routes';
 import ruleRoutes from './rule.routes';
 
 import settingsRoutes from './settings.routes';
+import whatsappRoutes from './whatsapp.routes';
+import reportRoutes from './reports.routes';
 
 const router = Router();
 
@@ -17,5 +19,7 @@ router.use('/products', productRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/rules', ruleRoutes);
 router.use('/settings', settingsRoutes);
+router.use('/whatsapp', whatsappRoutes);
+router.use('/reports', reportRoutes);
 
 export default router;

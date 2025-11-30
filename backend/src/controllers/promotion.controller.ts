@@ -62,7 +62,7 @@ class PromotionController {
 
   delete = catchAsync(async (req: AuthRequest, res: Response) => {
     await promotionService.delete(req.params.id);
-    res.status(204).json({
+    res.status(200).json({
       status: 'success',
       data: null,
     });

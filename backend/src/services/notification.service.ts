@@ -2,6 +2,7 @@ import prisma from '../config/database';
 import { AppError } from '../utils/errors';
 import twilioService from './integrations/twilio.service';
 import emailService from './integrations/email.service';
+import whatsappService from './whatsapp.service'; // Added whatsappService import
 import Bull, { Queue, Job } from 'bull';
 import redisConfig from '../config/redis';
 
@@ -86,8 +87,17 @@ class NotificationService {
           break;
 
         case 'WHATSAPP':
-          // Implementar integración WhatsApp
-          throw new Error('WhatsApp no implementado aún');
+          if (!phone && !recipient) {
+            throw new Error('Número de teléfono requerido para WhatsApp');
+          }
+          const targetPhone = phone || recipient!;
+          const sent = await whatsappService.sendMessage(targetPhone, message);
+
+          if (!sent) {
+            throw new Error('Error al enviar mensaje de WhatsApp (Cliente no listo o error de red)');
+          }
+          result = { status: 'sent', details: 'WhatsApp message sent successfully' };
+          break;
 
         default:
           throw new Error(`Canal no soportado: ${channel}`);
@@ -153,7 +163,7 @@ class NotificationService {
 
     for (const clientePromocion of promocion.clientes) {
       const cliente = clientePromocion.cliente;
-      
+
       // Personalizar mensaje
       let mensajePersonalizado = plantillaMensaje || promocion.plantillaMensaje || '';
       mensajePersonalizado = mensajePersonalizado

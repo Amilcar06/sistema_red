@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, TrendingUp, Users, MessageSquare, DollarSign, Loader2 } from 'lucide-react';
+import { Download, TrendingUp, Users, BarChart3, Calendar, FileSpreadsheet } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Alert, AlertDescription } from './ui/alert';
@@ -20,6 +20,7 @@ import {
 import clientService from '../services/client.service';
 import promotionService from '../services/promotion.service';
 import notificationService from '../services/notification.service';
+import apiClient from '../config/api';
 import { toast } from 'sonner';
 
 export function Reports() {
@@ -49,7 +50,7 @@ export function Reports() {
       // Cargar todas las promociones para calcular conversiones
       const allPromotions = await promotionService.findAll();
       const promotions = allPromotions.data || [];
-      
+
       const totalMessages = promotions.reduce((acc: number, p: any) => acc + (p.totalEnviados || 0), 0);
       const totalConversions = promotions.reduce((acc: number, p: any) => acc + (p.totalConvertidos || 0), 0);
       const conversionRate = totalMessages > 0 ? (totalConversions / totalMessages) * 100 : 0;
@@ -57,7 +58,7 @@ export function Reports() {
       // Cargar historial de notificaciones para estadísticas por canal
       const notificationsResponse = await notificationService.getHistory({ limit: 1000 });
       const notifications = notificationsResponse.data || [];
-      
+
       // Calcular estadísticas por canal
       const smsNotifications = notifications.filter((n: any) => n.canal === 'SMS');
       const whatsappNotifications = notifications.filter((n: any) => n.canal === 'WHATSAPP');
@@ -135,8 +136,23 @@ export function Reports() {
     { month: 'Nov', ingresos: stats.totalConversions * 100, gastos: stats.totalMessages * 0.1 },
   ];
 
-  const handleExport = () => {
-    toast.info('Funcionalidad de exportación en desarrollo');
+  const handleDownload = async (format: 'pdf' | 'excel') => {
+    try {
+      const response = await apiClient.get(`/reports/export?format=${format}`, {
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `reporte.${format === 'excel' ? 'xlsx' : 'pdf'}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Error downloading report:', error);
+      toast.error('Error al descargar el reporte');
+    }
   };
 
   if (isLoading) {
@@ -147,7 +163,7 @@ export function Reports() {
           <p className="text-gray-600">Análisis detallado del rendimiento</p>
         </div>
         <div className="flex items-center justify-center py-24">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <BarChart3 className="w-8 h-8 animate-spin text-blue-600" />
         </div>
       </div>
     );
@@ -160,10 +176,16 @@ export function Reports() {
           <h1 className="text-3xl mb-2">Reportes y Estadísticas</h1>
           <p className="text-gray-600">Análisis detallado del rendimiento</p>
         </div>
-        <Button variant="outline" onClick={handleExport}>
-          <Download className="w-4 h-4 mr-2" />
-          Exportar Reporte
-        </Button>
+        <div className="flex space-x-2">
+          <Button variant="outline" onClick={() => handleDownload('pdf')}>
+            <Download className="mr-2 h-4 w-4" />
+            Exportar PDF
+          </Button>
+          <Button variant="outline" onClick={() => handleDownload('excel')}>
+            <FileSpreadsheet className="mr-2 h-4 w-4" />
+            Exportar Excel
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -198,10 +220,12 @@ export function Reports() {
 
         <Card>
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-gray-600 text-sm">Mensajes Enviados</div>
-              <MessageSquare className="w-5 h-5 text-purple-600" />
-            </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Mensajes Enviados
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
             <div className="text-3xl mb-1">{stats.totalMessages.toLocaleString()}</div>
             <div className="text-green-600 text-sm">Total acumulado</div>
           </CardContent>
@@ -209,10 +233,12 @@ export function Reports() {
 
         <Card>
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-gray-600 text-sm">Conversiones</div>
-              <DollarSign className="w-5 h-5 text-orange-600" />
-            </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Costo Estimado
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
             <div className="text-3xl mb-1">{stats.totalConversions.toLocaleString()}</div>
             <div className="text-green-600 text-sm">Total acumulado</div>
           </CardContent>

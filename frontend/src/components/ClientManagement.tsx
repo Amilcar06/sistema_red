@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from './ui/dialog';
 import { Label } from './ui/label';
@@ -60,7 +61,7 @@ export function ClientManagement() {
       const filters: any = {};
       if (searchTerm) filters.search = searchTerm;
       if (filterStatus !== 'all') filters.estado = filterStatus;
-      
+
       const response = await clientService.findAll(filters);
       setClients(response.data || []);
     } catch (err: any) {
@@ -77,8 +78,8 @@ export function ClientManagement() {
   }, [searchTerm, filterStatus]);
 
   // Manejar búsqueda con debounce
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
-  
+  const [searchTimeout, setSearchTimeout] = useState<any>(null);
+
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
     if (searchTimeout) clearTimeout(searchTimeout);
@@ -97,7 +98,7 @@ export function ClientManagement() {
       'active': { label: 'Activo', className: 'bg-green-100 text-green-800' },
       'inactive': { label: 'Inactivo', className: 'bg-gray-100 text-gray-800' },
     };
-    
+
     const status = statusMap[estado] || { label: estado, className: 'bg-gray-100 text-gray-800' };
     return status;
   };
@@ -195,6 +196,9 @@ export function ClientManagement() {
               <DialogTitle>
                 {editingClient ? 'Editar Cliente' : 'Agregar Nuevo Cliente'}
               </DialogTitle>
+              <DialogDescription>
+                Complete el formulario para {editingClient ? 'editar el' : 'agregar un nuevo'} cliente.
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <div>
