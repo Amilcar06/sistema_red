@@ -43,6 +43,24 @@ class AuthController {
       data: user,
     });
   });
+
+  changePassword = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!req.user) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'No autenticado',
+      });
+    }
+
+    await authService.changePassword(req.user.id, currentPassword, newPassword);
+
+    res.json({
+      status: 'success',
+      message: 'Contraseña actualizada correctamente',
+    });
+  });
 }
 
 export default new AuthController();

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, CheckCircle, AlertCircle, Loader2, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
+import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import {
@@ -55,14 +56,50 @@ const RuleManagement: React.FC = () => {
     const [formData, setFormData] = useState<RuleFormData>(INITIAL_FORM_DATA);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const [search, setSearch] = useState('');
+    const [filterType, setFilterType] = useState('all');
+    const [filterStatus, setFilterStatus] = useState('all');
+    const [types, setTypes] = useState<string[]>([]);
+
+    const validateJson = (value: string) => {
+        try {
+            JSON.parse(value);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    };
+
+    const [jsonErrors, setJsonErrors] = useState({ condiciones: false, acciones: false });
+
+    const handleJsonChange = (field: 'condiciones' | 'acciones', value: string) => {
+        setFormData({ ...formData, [field]: value });
+        setJsonErrors({ ...jsonErrors, [field]: !validateJson(value) });
+    };
+
     useEffect(() => {
         fetchRules();
-    }, []);
+        fetchTypes();
+    }, [search, filterType, filterStatus]);
+
+    const fetchTypes = async () => {
+        try {
+            const data = await ruleService.getTypes();
+            setTypes(data);
+        } catch (error) {
+            console.error('Error fetching types:', error);
+        }
+    };
 
     const fetchRules = async () => {
         try {
             setLoading(true);
-            const data = await ruleService.getAll();
+            const filters: any = {};
+            if (search) filters.search = search;
+            if (filterType !== 'all') filters.tipoRegla = filterType;
+            if (filterStatus !== 'all') filters.activa = filterStatus === 'active';
+
+            const data = await ruleService.getAll(filters);
             setRules(data);
             setError(null);
         } catch (err) {
@@ -175,6 +212,8 @@ const RuleManagement: React.FC = () => {
         return types[tipo] || 'bg-gray-100 text-gray-800';
     };
 
+    // ... (rest of the component)
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -189,132 +228,132 @@ const RuleManagement: React.FC = () => {
                             Nueva Regla
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="sm:max-w-[600px]">
                         <DialogHeader>
-                            <DialogTitle>
-                                {editingRule ? 'Editar Regla' : 'Nueva Regla'}
-                            </DialogTitle>
+                            <DialogTitle>{editingRule ? 'Editar Regla' : 'Crear Nueva Regla'}</DialogTitle>
                             <DialogDescription>
-                                {editingRule ? 'Modifica los parámetros de la regla existente.' : 'Define una nueva regla de negocio para el sistema.'}
+                                {editingRule
+                                    ? 'Modifica los detalles de la regla existente.'
+                                    : 'Crea una nueva regla para automatizar procesos.'}
                             </DialogDescription>
                         </DialogHeader>
-
-                        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label htmlFor="nombre">Nombre</Label>
-                                    <Input
-                                        id="nombre"
-                                        value={formData.nombre}
-                                        onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                                        placeholder="Ej: Cliente Premium La Paz"
-                                        required
-                                        disabled={isSubmitting}
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="tipoRegla">Tipo</Label>
-                                    <Select
-                                        value={formData.tipoRegla}
-                                        onValueChange={(value: any) => setFormData({ ...formData, tipoRegla: value })}
-                                        disabled={isSubmitting}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Selecciona un tipo" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="ELEGIBILIDAD">Elegibilidad</SelectItem>
-                                            <SelectItem value="DESCUENTO">Descuento</SelectItem>
-                                            <SelectItem value="NOTIFICACION">Notificación</SelectItem>
-                                            <SelectItem value="PROGRAMACION">Programación</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                        <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="nombre" className="text-right">
+                                    Nombre
+                                </Label>
+                                <Input
+                                    id="nombre"
+                                    value={formData.nombre}
+                                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                                    className="col-span-3"
+                                    required
+                                    disabled={isSubmitting}
+                                />
                             </div>
-
-                            <div>
-                                <Label htmlFor="descripcion">Descripción</Label>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="descripcion" className="text-right">
+                                    Descripción
+                                </Label>
                                 <Input
                                     id="descripcion"
                                     value={formData.descripcion}
                                     onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-                                    placeholder="Descripción opcional"
+                                    className="col-span-3"
                                     disabled={isSubmitting}
                                 />
                             </div>
-
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="tipoRegla" className="text-right">
+                                    Tipo de Regla
+                                </Label>
+                                <Select
+                                    value={formData.tipoRegla}
+                                    onValueChange={(value: 'ELEGIBILIDAD' | 'DESCUENTO' | 'NOTIFICACION' | 'PROGRAMACION') =>
+                                        setFormData({ ...formData, tipoRegla: value })
+                                    }
+                                    disabled={isSubmitting}
+                                >
+                                    <SelectTrigger className="col-span-3">
+                                        <SelectValue placeholder="Selecciona un tipo" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="ELEGIBILIDAD">ELEGIBILIDAD</SelectItem>
+                                        <SelectItem value="DESCUENTO">DESCUENTO</SelectItem>
+                                        <SelectItem value="NOTIFICACION">NOTIFICACION</SelectItem>
+                                        <SelectItem value="PROGRAMACION">PROGRAMACION</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="prioridad" className="text-right">
+                                    Prioridad
+                                </Label>
+                                <Input
+                                    id="prioridad"
+                                    type="number"
+                                    value={formData.prioridad}
+                                    onChange={(e) => setFormData({ ...formData, prioridad: parseInt(e.target.value) })}
+                                    className="col-span-3"
+                                    required
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="activa" className="text-right">
+                                    Activa
+                                </Label>
+                                <Switch
+                                    id="activa"
+                                    checked={formData.activa}
+                                    onCheckedChange={(checked) => setFormData({ ...formData, activa: checked })}
+                                    className="col-span-3"
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <Label htmlFor="prioridad">Prioridad</Label>
-                                    <Input
-                                        id="prioridad"
-                                        type="number"
-                                        value={formData.prioridad}
-                                        onChange={(e) => setFormData({ ...formData, prioridad: parseInt(e.target.value) || 0 })}
+                                    <Label htmlFor="condiciones">Condiciones (JSON)</Label>
+                                    <Textarea
+                                        id="condiciones"
+                                        rows={5}
+                                        className={`font-mono text-sm ${jsonErrors.condiciones ? 'border-red-500' : ''}`}
+                                        value={formData.condiciones}
+                                        onChange={(e) => handleJsonChange('condiciones', e.target.value)}
                                         disabled={isSubmitting}
                                     />
+                                    {jsonErrors.condiciones && <p className="text-xs text-red-500 mt-1">JSON inválido</p>}
                                 </div>
-                                <div className="flex items-center pt-8">
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.activa}
-                                            onChange={(e) => setFormData({ ...formData, activa: e.target.checked })}
-                                            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-600"
-                                            disabled={isSubmitting}
-                                        />
-                                        <span className="text-sm font-medium text-gray-700">Regla Activa</span>
-                                    </label>
+                                <div>
+                                    <Label htmlFor="acciones">Acciones (JSON)</Label>
+                                    <Textarea
+                                        id="acciones"
+                                        rows={5}
+                                        className={`font-mono text-sm ${jsonErrors.acciones ? 'border-red-500' : ''}`}
+                                        value={formData.acciones}
+                                        onChange={(e) => handleJsonChange('acciones', e.target.value)}
+                                        disabled={isSubmitting}
+                                    />
+                                    {jsonErrors.acciones && <p className="text-xs text-red-500 mt-1">JSON inválido</p>}
                                 </div>
                             </div>
-
-                            <div>
-                                <Label htmlFor="condiciones">
-                                    Condiciones (JSON)
-                                    <span className="text-xs text-gray-400 ml-2">Ej: {"{ \"plan\": \"PREMIUM\" }"}</span>
-                                </Label>
-                                <Textarea
-                                    id="condiciones"
-                                    value={formData.condiciones}
-                                    onChange={(e) => setFormData({ ...formData, condiciones: e.target.value })}
-                                    rows={4}
-                                    className="font-mono text-sm bg-gray-50"
-                                    placeholder='{ "campo": "valor" }'
-                                    disabled={isSubmitting}
-                                />
-                            </div>
-
-                            <div>
-                                <Label htmlFor="acciones">
-                                    Acciones (JSON)
-                                    <span className="text-xs text-gray-400 ml-2">Ej: {"{ \"descuento\": 10 }"}</span>
-                                </Label>
-                                <Textarea
-                                    id="acciones"
-                                    value={formData.acciones}
-                                    onChange={(e) => setFormData({ ...formData, acciones: e.target.value })}
-                                    rows={4}
-                                    className="font-mono text-sm bg-gray-50"
-                                    placeholder='{ "accion": "valor" }'
-                                    disabled={isSubmitting}
-                                />
-                            </div>
-
+                            {error && (
+                                <Alert variant="destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertDescription>{error}</AlertDescription>
+                                </Alert>
+                            )}
                             <DialogFooter>
-                                <Button type="button" variant="outline" onClick={closeDialog} disabled={isSubmitting}>
+                                <Button variant="outline" onClick={closeDialog} disabled={isSubmitting}>
                                     Cancelar
                                 </Button>
-                                <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+                                <Button type="submit" disabled={isSubmitting || jsonErrors.condiciones || jsonErrors.acciones}>
                                     {isSubmitting ? (
-                                        <>
-                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                            Guardando...
-                                        </>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    ) : editingRule ? (
+                                        'Guardar Cambios'
                                     ) : (
-                                        <>
-                                            <Save className="w-4 h-4 mr-2" />
-                                            Guardar Regla
-                                        </>
+                                        'Crear Regla'
                                     )}
                                 </Button>
                             </DialogFooter>
@@ -322,6 +361,52 @@ const RuleManagement: React.FC = () => {
                     </DialogContent>
                 </Dialog>
             </div>
+
+            {/* Filters */}
+            <Card>
+                <CardContent className="p-6">
+                    <div className="flex items-center gap-2">
+                        <div className="flex-1 relative">
+                            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input
+                                placeholder="Buscar reglas..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="pl-10"
+                            />
+                        </div>
+                        <Select
+                            value={filterType}
+                            onValueChange={setFilterType}
+                        >
+                            <SelectTrigger className="w-[160px]">
+                                <SelectValue placeholder="Tipo" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Todos los Tipos</SelectItem>
+                                {types.map((type) => (
+                                    <SelectItem key={type} value={type}>
+                                        {type}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={filterStatus}
+                            onValueChange={setFilterStatus}
+                        >
+                            <SelectTrigger className="w-[140px]">
+                                <SelectValue placeholder="Estado" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Todos</SelectItem>
+                                <SelectItem value="active">Activas</SelectItem>
+                                <SelectItem value="inactive">Inactivas</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </CardContent>
+            </Card>
 
             {error && (
                 <Alert variant="destructive">

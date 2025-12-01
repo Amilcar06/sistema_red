@@ -21,6 +21,8 @@ router
     clientController.create
   );
 
+router.get('/plans', clientController.getPlans);
+router.get('/statuses', clientController.getStatuses);
 router.get('/statistics', clientController.getStatistics);
 
 router

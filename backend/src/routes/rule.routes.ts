@@ -18,6 +18,7 @@ router
   );
 
 router.post('/assign', authorize('ADMIN', 'OPERADOR'), ruleController.assignToPromotion);
+router.get('/types', ruleController.getTypes);
 router.get('/evaluate/:clienteId/:promocionId', ruleController.evaluateEligibility);
 
 router

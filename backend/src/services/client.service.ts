@@ -10,7 +10,7 @@ interface CreateClientData {
   estado?: 'ACTIVO' | 'INACTIVO' | 'SUSPENDIDO';
 }
 
-interface UpdateClientData extends Partial<CreateClientData> {}
+interface UpdateClientData extends Partial<CreateClientData> { }
 
 interface ClientFilters {
   busqueda?: string;
@@ -173,7 +173,7 @@ class ClientService {
 
   async getStatistics() {
     const cacheKey = 'client:statistics';
-    
+
     // Intentar obtener del caché (5 minutos TTL)
     const cached = await cacheService.get(cacheKey);
     if (cached) {
@@ -212,6 +212,19 @@ class ClientService {
    */
   async invalidateStatisticsCache() {
     await cacheService.deletePattern('client:statistics*');
+  }
+
+  async getPlans() {
+    const plans = await prisma.cliente.findMany({
+      select: {
+        plan: true,
+      },
+      distinct: ['plan'],
+      orderBy: {
+        plan: 'asc',
+      },
+    });
+    return plans.map((p) => p.plan);
   }
 }
 

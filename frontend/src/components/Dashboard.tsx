@@ -4,19 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Alert, AlertDescription } from './ui/alert';
 import { DashboardSkeleton } from './Skeleton';
-import clientService, { ClientStatistics } from '../services/client.service';
-import promotionService from '../services/promotion.service';
-import notificationService from '../services/notification.service';
+import dashboardService, { DashboardStats } from '../services/dashboard.service';
 
-interface DashboardStats {
-  totalClients: number;
-  activePromotions: number;
-  totalMessages: number;
-  totalConversions: number;
-  clientChange?: number;
-  messageChange?: number;
-  conversionChange?: number;
-}
+
 
 export function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
@@ -38,39 +28,11 @@ export function Dashboard() {
       setIsLoading(true);
       setError(null);
 
-      // Cargar estadísticas de clientes
-      const clientStats = await clientService.getStatistics();
+      const data = await dashboardService.getStats();
 
-      // Cargar promociones activas
-      const promotionsResponse = await promotionService.findAll({ estado: 'ACTIVA' });
-      const activePromotions = promotionsResponse.data?.length || 0;
-
-      // Calcular total de mensajes y conversiones de todas las promociones
-      const allPromotions = await promotionService.findAll();
-      const totalMessages = allPromotions.data?.reduce((acc: number, p: any) => acc + (p.totalEnviados || 0), 0) || 0;
-      const totalConversions = allPromotions.data?.reduce((acc: number, p: any) => acc + (p.totalConvertidos || 0), 0) || 0;
-
-      // Cargar historial de notificaciones para estadísticas por canal
-      const notificationsResponse = await notificationService.getHistory();
-      const notifications = notificationsResponse.data || [];
-      
-      const smsCount = notifications.filter((n: any) => n.canal === 'SMS').length;
-      const whatsappCount = notifications.filter((n: any) => n.canal === 'WHATSAPP').length;
-      const emailCount = notifications.filter((n: any) => n.canal === 'CORREO' || n.canal === 'EMAIL').length;
-      
-      const totalChannel = smsCount + whatsappCount + emailCount;
-      setChannelData([
-        { name: 'SMS', value: totalChannel > 0 ? Math.round((smsCount / totalChannel) * 100) : 0 },
-        { name: 'WhatsApp', value: totalChannel > 0 ? Math.round((whatsappCount / totalChannel) * 100) : 0 },
-        { name: 'Email', value: totalChannel > 0 ? Math.round((emailCount / totalChannel) * 100) : 0 },
-      ]);
-
-      setStats({
-        totalClients: clientStats.total || 0,
-        activePromotions,
-        totalMessages,
-        totalConversions,
-      });
+      setStats(data.stats);
+      setChannelData(data.channelData);
+      // setMonthlyData(data.monthlyData); // If we decide to use dynamic monthly data later
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'Error al cargar datos del dashboard';
       setError(errorMessage);
@@ -168,9 +130,8 @@ export function Dashboard() {
                   <div>
                     <p className="text-gray-600 text-sm mb-1">{stat.title}</p>
                     <h3 className="text-2xl mb-2">{stat.value}</h3>
-                    <div className={`flex items-center gap-1 text-sm ${
-                      stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                    }`}>
+                    <div className={`flex items-center gap-1 text-sm ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                      }`}>
                       <TrendIcon className="w-4 h-4" />
                       <span>{stat.change}</span>
                     </div>
@@ -248,10 +209,9 @@ export function Dashboard() {
             ].map((activity, index) => (
               <div key={index} className="flex items-center justify-between py-3 border-b last:border-b-0">
                 <div className="flex items-center gap-3">
-                  <div className={`w-2 h-2 rounded-full ${
-                    activity.type === 'success' ? 'bg-green-500' :
+                  <div className={`w-2 h-2 rounded-full ${activity.type === 'success' ? 'bg-green-500' :
                     activity.type === 'warning' ? 'bg-orange-500' : 'bg-blue-500'
-                  }`} />
+                    }`} />
                   <span>{activity.action}</span>
                 </div>
                 <span className="text-gray-500 text-sm">{activity.time}</span>

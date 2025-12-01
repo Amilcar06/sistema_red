@@ -24,8 +24,27 @@ class RuleService {
     });
   }
 
-  async findAll() {
+  async findAll(filters: any = {}) {
+    const { search, tipoRegla, activa } = filters;
+    const where: any = {};
+
+    if (search) {
+      where.OR = [
+        { nombre: { contains: search, mode: 'insensitive' } },
+        { descripcion: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (tipoRegla) {
+      where.tipoRegla = tipoRegla;
+    }
+
+    if (activa !== undefined) {
+      where.activa = activa === 'true' || activa === true;
+    }
+
     return prisma.reglaNegocio.findMany({
+      where,
       orderBy: [
         { prioridad: 'desc' },
         { fechaCreacion: 'desc' },

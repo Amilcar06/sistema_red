@@ -44,6 +44,7 @@ const INITIAL_FORM_DATA: ClientFormData = {
 
 export function ClientManagement() {
   const [clients, setClients] = useState<Client[]>([]);
+  const [plans, setPlans] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -73,8 +74,19 @@ export function ClientManagement() {
     }
   };
 
+  // Cargar planes
+  const loadPlans = async () => {
+    try {
+      const data = await clientService.getPlans();
+      setPlans(data);
+    } catch (err) {
+      console.error('Error al cargar planes:', err);
+    }
+  };
+
   useEffect(() => {
     loadClients();
+    loadPlans();
   }, [searchTerm, filterStatus]);
 
   // Manejar búsqueda con debounce
@@ -149,6 +161,7 @@ export function ClientManagement() {
       setFormData(INITIAL_FORM_DATA);
       setEditingClient(null);
       await loadClients();
+      loadPlans(); // Reload plans in case a new one was introduced
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'Error al guardar cliente';
       toast.error(errorMessage);
@@ -167,15 +180,12 @@ export function ClientManagement() {
       await clientService.delete(id);
       toast.success('Cliente eliminado correctamente');
       await loadClients();
+      loadPlans();
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'Error al eliminar cliente';
       toast.error(errorMessage);
     }
   };
-
-  // Los clientes ya vienen filtrados del backend, no necesitamos filtrar de nuevo localmente
-  // Esto mejora el rendimiento eliminando filtrado redundante
-  const filteredClients = clients;
 
   return (
     <div className="space-y-6">
@@ -245,9 +255,11 @@ export function ClientManagement() {
                     <SelectValue placeholder="Selecciona un plan" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Básico">Básico</SelectItem>
-                    <SelectItem value="Premium">Premium</SelectItem>
-                    <SelectItem value="Premium Plus">Premium Plus</SelectItem>
+                    {plans.map((plan) => (
+                      <SelectItem key={plan} value={plan}>
+                        {plan}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -302,17 +314,18 @@ export function ClientManagement() {
                 className="pl-10"
               />
             </div>
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filtrar por estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="ACTIVO">Activo</SelectItem>
-                <SelectItem value="INACTIVO">Inactivo</SelectItem>
-                <SelectItem value="SUSPENDIDO">Suspendido</SelectItem>
-              </SelectContent>
-            </Select>
+            <select
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">Todos los Estados</option>
+              {['ACTIVO', 'INACTIVO', 'SUSPENDIDO'].map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
           </div>
         </CardContent>
       </Card>

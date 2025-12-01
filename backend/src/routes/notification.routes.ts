@@ -22,6 +22,7 @@ router.post(
 );
 
 router.get('/history', notificationController.getHistory);
+router.get('/statuses', notificationController.getStatuses);
 
 export default router;
 

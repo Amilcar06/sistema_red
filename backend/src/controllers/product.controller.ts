@@ -43,6 +43,14 @@ class ProductController {
       data: null,
     });
   });
+
+  getCategories = catchAsync(async (req: AuthRequest, res: Response) => {
+    const categories = await productService.getCategories();
+    res.json({
+      status: 'success',
+      data: categories,
+    });
+  });
 }
 
 export default new ProductController();

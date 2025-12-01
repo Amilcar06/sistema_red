@@ -132,7 +132,20 @@ class ClientService {
 
     throw new Error(response.data.message || 'Error al obtener estadísticas');
   }
+
+  async getPlans(): Promise<string[]> {
+    const response = await apiClient.get<ApiResponse<string[]>>('/clients/plans');
+    if (response.data.status === 'success' && response.data.data) {
+      return response.data.data;
+    }
+
+    throw new Error(response.data.message || 'Error al obtener estadísticas');
+  }
+
+  async getStatuses(): Promise<string[]> {
+    const response = await apiClient.get<ApiResponse<string[]>>('/clients/statuses');
+    return response.data.data || [];
+  }
 }
 
 export default new ClientService();
-

@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
 // Configuración base de la API
@@ -41,7 +42,7 @@ apiClient.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
           const response = await axios.post(
-            `${API_BASE_URL}/api/${API_VERSION}/auth/refresh`,
+            `${API_BASE_URL}/api/${API_VERSION}/auth/refresh-token`,
             { refreshToken }
           );
 

@@ -19,6 +19,8 @@ router
 
 router.post('/:id/activate', authorize('ADMIN', 'OPERADOR'), promotionController.activate);
 router.post('/:id/pause', authorize('ADMIN', 'OPERADOR'), promotionController.pause);
+router.get('/segments', promotionController.getSegments);
+router.get('/statuses', promotionController.getStatuses);
 router.get('/:id/statistics', promotionController.getStatistics);
 
 router

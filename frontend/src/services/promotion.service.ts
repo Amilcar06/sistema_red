@@ -33,7 +33,7 @@ export interface CreatePromotionData {
   productIds?: string[];
 }
 
-export interface UpdatePromotionData extends Partial<CreatePromotionData> {}
+export interface UpdatePromotionData extends Partial<CreatePromotionData> { }
 
 export interface PromotionFilters {
   estado?: string;
@@ -53,7 +53,7 @@ export interface PromotionStatistics {
 class PromotionService {
   async findAll(filters: PromotionFilters = {}): Promise<PaginatedResponse<Promotion>> {
     const params = new URLSearchParams();
-    
+
     if (filters.estado) params.append('estado', filters.estado);
     if (filters.search) params.append('busqueda', filters.search);
     if (filters.page) params.append('pagina', filters.page.toString());
@@ -72,7 +72,7 @@ class PromotionService {
         total: 0,
         totalPaginas: 0,
       };
-      
+
       return {
         data: backendData,
         pagination: {
@@ -163,7 +163,16 @@ class PromotionService {
 
     throw new Error(response.data.message || 'Error al obtener estadísticas');
   }
+
+  async getSegments(): Promise<string[]> {
+    const response = await apiClient.get<ApiResponse<string[]>>('/promotions/segments');
+    return response.data.data;
+  }
+
+  async getStatuses(): Promise<string[]> {
+    const response = await apiClient.get<ApiResponse<string[]>>('/promotions/statuses');
+    return response.data.data || [];
+  }
 }
 
 export default new PromotionService();
-

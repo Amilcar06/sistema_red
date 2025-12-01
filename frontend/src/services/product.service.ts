@@ -18,23 +18,25 @@ export interface CreateProductData {
   precio: number;
 }
 
-export interface UpdateProductData extends Partial<CreateProductData> {}
+export interface UpdateProductData extends Partial<CreateProductData> { }
 
 export interface ProductFilters {
   categoria?: string;
   activo?: boolean;
   pagina?: number;
   limite?: number;
+  busqueda?: string;
 }
 
 class ProductService {
   async findAll(filters: ProductFilters = {}): Promise<PaginatedResponse<Product>> {
     const params = new URLSearchParams();
-    
+
     if (filters.categoria) params.append('categoria', filters.categoria);
     if (filters.activo !== undefined) params.append('activo', filters.activo.toString());
     if (filters.pagina) params.append('pagina', filters.pagina.toString());
     if (filters.limite) params.append('limite', filters.limite.toString());
+    if (filters.busqueda) params.append('busqueda', filters.busqueda);
 
     const response = await apiClient.get<ApiResponse<any>>(
       `/products?${params.toString()}`
@@ -42,14 +44,15 @@ class ProductService {
 
     if (response.data.status === 'success') {
       // El backend devuelve { datos, paginacion } directamente
-      const backendData = response.data.datos || response.data.data || [];
-      const backendPagination = response.data.paginacion || response.data.pagination || {
+      const responseData = response.data as any;
+      const backendData = responseData.datos || responseData.data || [];
+      const backendPagination = responseData.paginacion || responseData.pagination || {
         pagina: 1,
         limite: 10,
         total: 0,
         totalPaginas: 0,
       };
-      
+
       return {
         data: backendData,
         pagination: {
@@ -103,6 +106,16 @@ class ProductService {
     if (response.data.status !== 'success') {
       throw new Error(response.data.message || 'Error al eliminar producto');
     }
+  }
+
+  async getCategories(): Promise<string[]> {
+    const response = await apiClient.get<ApiResponse<string[]>>('/products/categories');
+
+    if (response.data.status === 'success' && response.data.data) {
+      return response.data.data;
+    }
+
+    return [];
   }
 }
 

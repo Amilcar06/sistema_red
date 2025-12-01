@@ -190,6 +190,24 @@ class PromotionService {
       where: { id },
     });
   }
+
+  async getSegments() {
+    const segments = await prisma.promocion.findMany({
+      select: {
+        segmentoObjetivo: true,
+      },
+      where: {
+        segmentoObjetivo: {
+          not: null,
+        },
+      },
+      distinct: ['segmentoObjetivo'],
+      orderBy: {
+        segmentoObjetivo: 'asc',
+      },
+    });
+    return segments.map((s) => s.segmentoObjetivo).filter(Boolean);
+  }
 }
 
 export default new PromotionService();

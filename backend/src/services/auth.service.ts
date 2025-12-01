@@ -138,6 +138,22 @@ class AuthService {
     return user;
   }
 
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await prisma.usuario.findUnique({ where: { id: userId } });
+    if (!user) throw new AppError('Usuario no encontrado', 404);
+
+    const isValid = await bcrypt.compare(currentPassword, user.contrasena);
+    if (!isValid) throw new AppError('Contraseña actual incorrecta', 401);
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    await prisma.usuario.update({
+      where: { id: userId },
+      data: { contrasena: hashedPassword }
+    });
+
+    return { message: 'Contraseña actualizada correctamente' };
+  }
+
   private generateTokens(userId: string) {
     const jwtSecret = process.env.JWT_SECRET;
     const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;

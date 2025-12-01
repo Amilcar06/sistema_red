@@ -8,6 +8,8 @@ const router = Router();
 
 router.use(authenticate);
 
+router.get('/categories', productController.getCategories);
+
 router
   .route('/')
   .get(productController.findAll)

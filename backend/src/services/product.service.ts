@@ -16,7 +16,7 @@ class ProductService {
   }
 
   async findAll(filters: any = {}) {
-    const { categoria, activo, pagina = 1, limite = 10 } = filters;
+    const { categoria, activo, pagina = 1, limite = 10, busqueda } = filters;
     // Convertir a números ya que los query params vienen como strings
     const paginaNum = typeof pagina === 'string' ? parseInt(pagina, 10) : pagina;
     const limiteNum = typeof limite === 'string' ? parseInt(limite, 10) : limite;
@@ -29,6 +29,13 @@ class ProductService {
 
     if (activo !== undefined) {
       where.activo = activo === 'true' || activo === true;
+    }
+
+    if (busqueda) {
+      where.OR = [
+        { nombre: { contains: busqueda, mode: 'insensitive' } },
+        { descripcion: { contains: busqueda, mode: 'insensitive' } },
+      ];
     }
 
     const [productos, total] = await Promise.all([
@@ -82,6 +89,19 @@ class ProductService {
     return prisma.producto.delete({
       where: { id },
     });
+  }
+
+  async getCategories() {
+    const categories = await prisma.producto.findMany({
+      select: {
+        categoria: true,
+      },
+      distinct: ['categoria'],
+      orderBy: {
+        categoria: 'asc',
+      },
+    });
+    return categories.map((c) => c.categoria);
   }
 }
 

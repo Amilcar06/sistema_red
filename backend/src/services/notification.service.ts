@@ -184,7 +184,7 @@ class NotificationService {
   }
 
   async getHistory(filters: any = {}) {
-    const { canal, estado, clienteId, pagina = 1, limite = 20 } = filters;
+    const { canal, estado, clienteId, search, pagina = 1, limite = 20 } = filters;
     // Convertir a números ya que los query params vienen como strings
     const paginaNum = typeof pagina === 'string' ? parseInt(pagina, 10) : pagina;
     const limiteNum = typeof limite === 'string' ? parseInt(limite, 10) : limite;
@@ -201,6 +201,13 @@ class NotificationService {
 
     if (clienteId) {
       where.clienteId = clienteId;
+    }
+
+    if (search) {
+      where.OR = [
+        { titulo: { contains: search, mode: 'insensitive' } },
+        { mensaje: { contains: search, mode: 'insensitive' } },
+      ];
     }
 
     const [notificaciones, total] = await Promise.all([

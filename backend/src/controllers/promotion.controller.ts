@@ -67,7 +67,22 @@ class PromotionController {
       data: null,
     });
   });
+
+  getSegments = catchAsync(async (req: AuthRequest, res: Response) => {
+    const segments = await promotionService.getSegments();
+    res.json({
+      status: 'success',
+      data: segments,
+    });
+  });
+
+  getStatuses = catchAsync(async (req: AuthRequest, res: Response) => {
+    const statuses = ['BORRADOR', 'ACTIVA', 'PAUSADA', 'FINALIZADA', 'CANCELADA'];
+    res.json({
+      status: 'success',
+      data: statuses
+    });
+  });
 }
 
 export default new PromotionController();
-

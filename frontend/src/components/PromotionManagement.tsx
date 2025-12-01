@@ -53,6 +53,8 @@ const INITIAL_FORM_DATA: PromotionFormData = {
 export function PromotionManagement() {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [segments, setSegments] = useState<string[]>([]);
+  const [statuses, setStatuses] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -91,9 +93,29 @@ export function PromotionManagement() {
     }
   };
 
+  const loadSegments = async () => {
+    try {
+      const segmentsData = await promotionService.getSegments();
+      setSegments(segmentsData);
+    } catch (error) {
+      console.error('Error fetching segments:', error);
+    }
+  };
+
+  const loadStatuses = async () => {
+    try {
+      const statusesData = await promotionService.getStatuses();
+      setStatuses(statusesData);
+    } catch (error) {
+      console.error('Error fetching statuses:', error);
+    }
+  };
+
   useEffect(() => {
     loadPromotions();
     loadProducts();
+    loadSegments();
+    loadStatuses();
   }, [filterStatus]);
 
   // Mapear estado del backend al frontend
@@ -167,6 +189,7 @@ export function PromotionManagement() {
       setFormData(INITIAL_FORM_DATA);
       setEditingPromotion(null);
       await loadPromotions();
+      loadSegments();
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'Error al guardar promoción';
       toast.error(errorMessage);
@@ -185,6 +208,7 @@ export function PromotionManagement() {
       await promotionService.delete(id);
       toast.success('Promoción eliminada correctamente');
       await loadPromotions();
+      loadSegments();
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'Error al eliminar promoción';
       toast.error(errorMessage);
@@ -356,9 +380,11 @@ export function PromotionManagement() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos los clientes</SelectItem>
-                    <SelectItem value="basic">Clientes Básico</SelectItem>
-                    <SelectItem value="Premium">Clientes Premium</SelectItem>
-                    <SelectItem value="Premium Plus">Clientes Premium Plus</SelectItem>
+                    {segments.map((segment) => (
+                      <SelectItem key={segment} value={segment}>
+                        {segment}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -444,19 +470,18 @@ export function PromotionManagement() {
       {/* Filter */}
       <Card>
         <CardContent className="p-6">
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filtrar por estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los estados</SelectItem>
-              <SelectItem value="BORRADOR">Borrador</SelectItem>
-              <SelectItem value="ACTIVA">Activa</SelectItem>
-              <SelectItem value="PAUSADA">Pausada</SelectItem>
-              <SelectItem value="FINALIZADA">Finalizada</SelectItem>
-              <SelectItem value="CANCELADA">Cancelada</SelectItem>
-            </SelectContent>
-          </Select>
+          <select
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="all">Todos los Estados</option>
+            {statuses.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
         </CardContent>
       </Card>
 

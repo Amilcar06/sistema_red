@@ -17,9 +17,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import clientService from '../services/client.service';
-import promotionService from '../services/promotion.service';
-import notificationService from '../services/notification.service';
+import reportsService from '../services/reports.service';
 import apiClient from '../config/api';
 import { toast } from 'sonner';
 
@@ -44,66 +42,12 @@ export function Reports() {
       setIsLoading(true);
       setError(null);
 
-      // Cargar estadísticas de clientes
-      const clientStats = await clientService.getStatistics();
+      const data = await reportsService.getStats();
 
-      // Cargar todas las promociones para calcular conversiones
-      const allPromotions = await promotionService.findAll();
-      const promotions = allPromotions.data || [];
-
-      const totalMessages = promotions.reduce((acc: number, p: any) => acc + (p.totalEnviados || 0), 0);
-      const totalConversions = promotions.reduce((acc: number, p: any) => acc + (p.totalConvertidos || 0), 0);
-      const conversionRate = totalMessages > 0 ? (totalConversions / totalMessages) * 100 : 0;
-
-      // Cargar historial de notificaciones para estadísticas por canal
-      const notificationsResponse = await notificationService.getHistory({ limit: 1000 });
-      const notifications = notificationsResponse.data || [];
-
-      // Calcular estadísticas por canal
-      const smsNotifications = notifications.filter((n: any) => n.canal === 'SMS');
-      const whatsappNotifications = notifications.filter((n: any) => n.canal === 'WHATSAPP');
-      const emailNotifications = notifications.filter((n: any) => n.canal === 'CORREO' || n.canal === 'EMAIL');
-
-      // Agrupar por promoción para calcular conversiones por canal
-      const smsCount = smsNotifications.length;
-      const whatsappCount = whatsappNotifications.length;
-      const emailCount = emailNotifications.length;
-
-      // Buscar conversiones relacionadas (las notificaciones de promociones que fueron convertidas)
-      // Para simplificar, usaremos las estadísticas de las promociones
-      const channelPerf = [
-        {
-          channel: 'SMS',
-          envios: smsCount,
-          conversiones: Math.round(smsCount * (conversionRate / 100)), // Estimación basada en tasa general
-          tasaConversion: conversionRate,
-        },
-        {
-          channel: 'WhatsApp',
-          envios: whatsappCount,
-          conversiones: Math.round(whatsappCount * (conversionRate / 100)),
-          tasaConversion: conversionRate,
-        },
-        {
-          channel: 'Email',
-          envios: emailCount,
-          conversiones: Math.round(emailCount * (conversionRate / 100)),
-          tasaConversion: conversionRate,
-        },
-      ];
-
-      setChannelPerformance(channelPerf);
-
-      // Calcular ROI estimado (esto sería mejor si hubiera datos de costos)
-      const estimatedROI = conversionRate > 0 ? conversionRate * 10 : 0;
-
-      setStats({
-        conversionRate: parseFloat(conversionRate.toFixed(1)),
-        activeClients: clientStats.activo || 0,
-        totalMessages,
-        totalConversions,
-        roi: parseFloat(estimatedROI.toFixed(0)),
-      });
+      setStats(data.stats);
+      setChannelPerformance(data.channelPerformance);
+      // setConversionData(data.conversionData); // If we make this dynamic
+      // setRevenueData(data.revenueData); // If we make this dynamic
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'Error al cargar datos del reporte';
       setError(errorMessage);

@@ -40,8 +40,23 @@ export function MessageCenter() {
   const [error, setError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [formData, setFormData] = useState<MessageFormData>(INITIAL_FORM_DATA);
+  const [search, setSearch] = useState('');
+  const [statuses, setStatuses] = useState<string[]>([]);
   const [filterChannel, setFilterChannel] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+
+  useEffect(() => {
+    fetchStatuses();
+  }, []);
+
+  const fetchStatuses = async () => {
+    try {
+      const data = await notificationService.getStatuses();
+      setStatuses(data);
+    } catch (error) {
+      console.error('Error fetching statuses:', error);
+    }
+  };
 
   // Cargar historial
   const loadHistory = async () => {
@@ -55,7 +70,10 @@ export function MessageCenter() {
       if (filterStatus !== 'all') {
         filters.status = filterStatus;
       }
-      
+      if (search) {
+        filters.search = search;
+      }
+
       const response = await notificationService.getHistory(filters);
       setMessages(response.data || []);
     } catch (err: any) {
@@ -70,7 +88,7 @@ export function MessageCenter() {
   // Cargar promociones
   const loadPromotions = async () => {
     try {
-      const response = await promotionService.findAll();
+      const response = await promotionService.findAll({ estado: 'ACTIVA' });
       setPromotions(response.data || []);
     } catch (err) {
       console.error('Error al cargar promociones:', err);
@@ -80,7 +98,7 @@ export function MessageCenter() {
   useEffect(() => {
     loadHistory();
     loadPromotions();
-  }, [filterChannel, filterStatus]);
+  }, [filterChannel, filterStatus, search]);
 
   // Enviar mensaje individual
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -181,7 +199,7 @@ export function MessageCenter() {
       'FALLIDA': { label: 'Fallida', className: 'bg-red-100 text-red-800' },
       'CANCELADA': { label: 'Cancelada', className: 'bg-gray-100 text-gray-800' },
     };
-    
+
     return statusMap[status] || { label: status, className: 'bg-gray-100 text-gray-800' };
   };
 
@@ -189,7 +207,6 @@ export function MessageCenter() {
   const smsCount = messages.filter((m) => m.canal === 'SMS').length;
   const whatsappCount = messages.filter((m) => m.canal === 'WHATSAPP').length;
   const emailCount = messages.filter((m) => m.canal === 'CORREO' || m.canal === 'EMAIL').length;
-  const sentCount = messages.filter((m) => m.estado === 'ENVIADA' || m.estado === 'ENTREGADA').length;
 
   return (
     <div className="space-y-6">
@@ -373,11 +390,17 @@ export function MessageCenter() {
         <TabsContent value="history" className="mt-6">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <CardTitle>Historial de Mensajes</CardTitle>
-                <div className="flex gap-2">
+                <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                  <Input
+                    placeholder="Buscar por título o mensaje..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full md:w-64"
+                  />
                   <Select value={filterChannel} onValueChange={setFilterChannel}>
-                    <SelectTrigger className="w-40">
+                    <SelectTrigger className="w-full md:w-40">
                       <SelectValue placeholder="Canal" />
                     </SelectTrigger>
                     <SelectContent>
@@ -387,17 +410,18 @@ export function MessageCenter() {
                       <SelectItem value="CORREO">Email</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los estados</SelectItem>
-                      <SelectItem value="ENVIADA">Enviada</SelectItem>
-                      <SelectItem value="PENDIENTE">Pendiente</SelectItem>
-                      <SelectItem value="FALLIDA">Fallida</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full md:w-40"
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                  >
+                    <option value="all">Todos los Estados</option>
+                    {statuses.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </CardHeader>
@@ -407,7 +431,7 @@ export function MessageCenter() {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-              
+
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="w-8 h-8 animate-spin text-blue-600" />

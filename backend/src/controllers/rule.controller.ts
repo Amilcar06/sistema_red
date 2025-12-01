@@ -14,10 +14,18 @@ class RuleController {
   });
 
   findAll = catchAsync(async (req: AuthRequest, res: Response) => {
-    const rules = await ruleService.findAll();
+    const rules = await ruleService.findAll(req.query);
     res.json({
       status: 'success',
       data: rules,
+    });
+  });
+
+  getTypes = catchAsync(async (req: Request, res: Response) => {
+    const types = ['ELEGIBILIDAD', 'DESCUENTO', 'NOTIFICACION', 'PROGRAMACION'];
+    res.json({
+      status: 'success',
+      data: types
     });
   });
 

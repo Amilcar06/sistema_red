@@ -1,13 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import reportExportService from '../services/report-export.service';
 // Importar servicio de reportes existente para obtener datos
-// Asumimos que existe un servicio que obtiene los datos, por ahora simularemos datos o usaremos uno existente
+import reportsService from '../services/reports.service';
 import notificationService from '../services/notification.service';
 
 export const getDashboardStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // Implementación existente o placeholder
-        res.json({ message: "Dashboard stats" });
+        const stats = await reportsService.getStats();
+        res.json({
+            status: 'success',
+            data: stats
+        });
     } catch (error) {
         next(error);
     }

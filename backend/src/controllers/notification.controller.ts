@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
 import notificationService from '../services/notification.service';
 import { catchAsync } from '../utils/helpers';
@@ -31,6 +31,14 @@ class NotificationController {
     res.json({
       status: 'success',
       ...result,
+    });
+  });
+
+  getStatuses = catchAsync(async (req: Request, res: Response) => {
+    const statuses = ['PENDIENTE', 'EN_COLA', 'ENVIADA', 'ENTREGADA', 'FALLIDA', 'CANCELADA'];
+    res.json({
+      status: 'success',
+      data: statuses
     });
   });
 }

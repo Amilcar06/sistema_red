@@ -10,6 +10,8 @@ import settingsRoutes from './settings.routes';
 import whatsappRoutes from './whatsapp.routes';
 import reportRoutes from './reports.routes';
 
+import dashboardRoutes from './dashboard.routes';
+
 const router = Router();
 
 router.use('/auth', authRoutes);
@@ -21,5 +23,6 @@ router.use('/rules', ruleRoutes);
 router.use('/settings', settingsRoutes);
 router.use('/whatsapp', whatsappRoutes);
 router.use('/reports', reportRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 export default router;

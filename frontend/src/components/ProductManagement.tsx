@@ -27,8 +27,12 @@ import { toast } from 'sonner';
 
 export function ProductManagement() {
     const [products, setProducts] = useState<Product[]>([]);
+    const [categories, setCategories] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -39,11 +43,25 @@ export function ProductManagement() {
         precio: 0,
     });
 
+    // Debounce search term
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchTerm);
+            setPage(1); // Reset to page 1 on new search
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
     const loadProducts = async () => {
         try {
             setIsLoading(true);
-            const response = await productService.findAll();
+            const response = await productService.findAll({
+                pagina: page,
+                limite: 9, // 3x3 grid
+                busqueda: debouncedSearch
+            });
             setProducts(response.data || []);
+            setTotalPages(response.pagination?.totalPages || 1);
         } catch (error) {
             console.error('Error loading products:', error);
             toast.error('Error al cargar productos');
@@ -52,8 +70,21 @@ export function ProductManagement() {
         }
     };
 
+    const loadCategories = async () => {
+        try {
+            const cats = await productService.getCategories();
+            setCategories(cats);
+        } catch (error) {
+            console.error('Error loading categories:', error);
+        }
+    };
+
     useEffect(() => {
         loadProducts();
+    }, [page, debouncedSearch]);
+
+    useEffect(() => {
+        loadCategories();
     }, []);
 
     const handleCreate = async (e: React.FormEvent) => {
@@ -64,6 +95,7 @@ export function ProductManagement() {
             setIsCreateOpen(false);
             setFormData({ nombre: '', descripcion: '', categoria: '', precio: 0 });
             loadProducts();
+            loadCategories();
         } catch (error) {
             console.error('Error creating product:', error);
             toast.error('Error al crear producto');
@@ -80,6 +112,7 @@ export function ProductManagement() {
             setIsEditOpen(false);
             setSelectedProduct(null);
             loadProducts();
+            loadCategories();
         } catch (error) {
             console.error('Error updating product:', error);
             toast.error('Error al actualizar producto');
@@ -93,6 +126,7 @@ export function ProductManagement() {
             await productService.delete(id);
             toast.success('Producto eliminado exitosamente');
             loadProducts();
+            loadCategories();
         } catch (error) {
             console.error('Error deleting product:', error);
             toast.error('Error al eliminar producto');
@@ -110,12 +144,7 @@ export function ProductManagement() {
         setIsEditOpen(true);
     };
 
-    const filteredProducts = products.filter(product =>
-        product.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.categoria.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    if (isLoading) {
+    if (isLoading && products.length === 0) {
         return (
             <div className="flex items-center justify-center h-96">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
@@ -174,10 +203,11 @@ export function ProductManagement() {
                                         <SelectValue placeholder="Selecciona una categoría" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="INTERNET">Internet</SelectItem>
-                                        <SelectItem value="TELEFONIA">Telefonía</SelectItem>
-                                        <SelectItem value="CABLE">Cable TV</SelectItem>
-                                        <SelectItem value="PAQUETE">Paquete</SelectItem>
+                                        {categories.map((cat) => (
+                                            <SelectItem key={cat} value={cat}>
+                                                {cat}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -212,40 +242,65 @@ export function ProductManagement() {
                 </div>
             </div>
 
-            {filteredProducts.length === 0 ? (
+            {products.length === 0 && !isLoading ? (
                 <EmptyProducts onCreate={() => setIsCreateOpen(true)} />
             ) : (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredProducts.map((product) => (
-                        <Card key={product.id}>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">
-                                    {product.categoria}
-                                </CardTitle>
-                                <Package className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{product.nombre}</div>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    {product.descripcion}
-                                </p>
-                                <div className="mt-4 flex items-center justify-between">
-                                    <span className="text-lg font-bold text-blue-600">
-                                        Bs {Number(product.precio).toFixed(2)}
-                                    </span>
-                                    <div className="flex space-x-2">
-                                        <Button variant="ghost" size="icon" onClick={() => openEditModal(product)}>
-                                            <Edit className="h-4 w-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(product.id)}>
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+                <>
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {products.map((product) => (
+                            <Card key={product.id}>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium">
+                                        {product.categoria}
+                                    </CardTitle>
+                                    <Package className="h-4 w-4 text-muted-foreground" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">{product.nombre}</div>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        {product.descripcion}
+                                    </p>
+                                    <div className="mt-4 flex items-center justify-between">
+                                        <span className="text-lg font-bold text-blue-600">
+                                            Bs {Number(product.precio).toFixed(2)}
+                                        </span>
+                                        <div className="flex space-x-2">
+                                            <Button variant="ghost" size="icon" onClick={() => openEditModal(product)}>
+                                                <Edit className="h-4 w-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(product.id)}>
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div className="flex justify-center items-center space-x-2 mt-6">
+                            <Button
+                                variant="outline"
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                disabled={page === 1}
+                            >
+                                Anterior
+                            </Button>
+                            <span className="text-sm text-gray-600">
+                                Página {page} de {totalPages}
+                            </span>
+                            <Button
+                                variant="outline"
+                                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                disabled={page === totalPages}
+                            >
+                                Siguiente
+                            </Button>
+                        </div>
+                    )}
+                </>
             )}
 
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
@@ -284,10 +339,11 @@ export function ProductManagement() {
                                     <SelectValue placeholder="Selecciona una categoría" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="INTERNET">Internet</SelectItem>
-                                    <SelectItem value="TELEFONIA">Telefonía</SelectItem>
-                                    <SelectItem value="CABLE">Cable TV</SelectItem>
-                                    <SelectItem value="PAQUETE">Paquete</SelectItem>
+                                    {categories.map((cat) => (
+                                        <SelectItem key={cat} value={cat}>
+                                            {cat}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>

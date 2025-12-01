@@ -33,18 +33,18 @@ class AuthService {
       '/auth/login',
       data
     );
-    
+
     if (response.data.status === 'success' && response.data.data) {
       const { accessToken, refreshToken, usuario } = response.data.data;
-      
+
       // Guardar tokens en localStorage
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(usuario));
-      
+
       return response.data.data;
     }
-    
+
     throw new Error(response.data.message || 'Error al iniciar sesión');
   }
 
@@ -53,47 +53,58 @@ class AuthService {
       '/auth/register',
       data
     );
-    
+
     if (response.data.status === 'success' && response.data.data) {
       const { accessToken, refreshToken, usuario } = response.data.data;
-      
+
       // Guardar tokens en localStorage
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(usuario));
-      
+
       return response.data.data;
     }
-    
+
     throw new Error(response.data.message || 'Error al registrar usuario');
   }
 
   async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
     const response = await apiClient.post<ApiResponse<{ accessToken: string; refreshToken: string }>>(
-      '/auth/refresh',
+      '/auth/refresh-token',
       { refreshToken }
     );
-    
+
     if (response.data.status === 'success' && response.data.data) {
       const { accessToken, refreshToken: newRefreshToken } = response.data.data;
-      
+
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', newRefreshToken);
-      
+
       return response.data.data;
     }
-    
+
     throw new Error(response.data.message || 'Error al refrescar token');
+  }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    const response = await apiClient.post<ApiResponse<any>>(
+      '/auth/change-password',
+      { currentPassword, newPassword }
+    );
+
+    if (response.data.status !== 'success') {
+      throw new Error(response.data.message || 'Error al cambiar contraseña');
+    }
   }
 
   async getMe(): Promise<User> {
     const response = await apiClient.get<ApiResponse<User>>('/auth/me');
-    
+
     if (response.data.status === 'success' && response.data.data) {
       localStorage.setItem('user', JSON.stringify(response.data.data));
       return response.data.data;
     }
-    
+
     throw new Error(response.data.message || 'Error al obtener usuario');
   }
 

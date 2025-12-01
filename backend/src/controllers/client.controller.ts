@@ -51,7 +51,24 @@ class ClientController {
       data: statistics,
     });
   });
+
+  getPlans = catchAsync(async (req: Request, res: Response) => {
+    const plans = await clientService.getPlans();
+    res.json({
+      status: 'success',
+      data: plans,
+    });
+  });
+
+  getStatuses = catchAsync(async (req: Request, res: Response) => {
+    // Importar el enum directamente o hardcodear los valores si no se puede importar fácilmente en este contexto
+    // Idealmente: import { EstadoCliente } from '@prisma/client';
+    const statuses = ['ACTIVO', 'INACTIVO', 'SUSPENDIDO'];
+    res.json({
+      status: 'success',
+      data: statuses,
+    });
+  });
 }
 
 export default new ClientController();
-

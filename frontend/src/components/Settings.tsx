@@ -17,6 +17,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 import settingsService, { Setting } from '../services/settings.service';
+import authService from '../services/auth.service';
 
 export function Settings() {
   const { user, refreshUser } = useAuth();
@@ -188,10 +189,9 @@ export function Settings() {
     // Nota: La seguridad se maneja diferente, usualmente con un endpoint específico de cambio de contraseña
     // Por ahora simularemos que se guarda como configuración, pero idealmente debería ser authService.changePassword
     try {
-      // Simulación por ahora
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      toast.success('Configuración de seguridad actualizada');
-      setSuccess('Configuración de seguridad actualizada correctamente');
+      await authService.changePassword(security.currentPassword, security.newPassword);
+      toast.success('Contraseña actualizada correctamente');
+      setSuccess('Contraseña actualizada correctamente');
       setSecurity({
         currentPassword: '',
         newPassword: '',
@@ -424,6 +424,7 @@ export function Settings() {
                   <Label htmlFor="twilio-sid">Account SID</Label>
                   <Input
                     id="twilio-sid"
+                    type="password"
                     placeholder="AC..."
                     value={apiConfig.twilioSid}
                     onChange={(e) => setApiConfig({ ...apiConfig, twilioSid: e.target.value })}
@@ -470,6 +471,7 @@ export function Settings() {
                   <Label htmlFor="whatsapp-phone">Phone Number ID</Label>
                   <Input
                     id="whatsapp-phone"
+                    type="password"
                     placeholder="ID..."
                     value={apiConfig.whatsappPhoneId}
                     onChange={(e) => setApiConfig({ ...apiConfig, whatsappPhoneId: e.target.value })}

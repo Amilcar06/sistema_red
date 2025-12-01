@@ -34,8 +34,18 @@ export interface UpdateRuleData {
 }
 
 class RuleService {
-    async getAll(): Promise<Rule[]> {
-        const response = await apiClient.get<ApiResponse<Rule[]>>('/rules');
+    async getAll(filters: any = {}): Promise<Rule[]> {
+        const params = new URLSearchParams();
+        if (filters.search) params.append('search', filters.search);
+        if (filters.tipoRegla && filters.tipoRegla !== 'all') params.append('tipoRegla', filters.tipoRegla);
+        if (filters.activa !== undefined && filters.activa !== 'all') params.append('activa', filters.activa);
+
+        const response = await apiClient.get<ApiResponse<Rule[]>>(`/rules?${params.toString()}`);
+        return response.data.data || [];
+    }
+
+    async getTypes(): Promise<string[]> {
+        const response = await apiClient.get<ApiResponse<string[]>>('/rules/types');
         return response.data.data || [];
     }
 
