@@ -50,9 +50,9 @@ export function Settings() {
   // Configuración general
   const [generalConfig, setGeneralConfig] = useState({
     companyName: 'TelePromo',
-    timezone: 'mx',
+    timezone: 'bo',
     language: 'es',
-    currency: 'mxn',
+    currency: 'bob',
     dailyLimit: 10000,
     hourlyLimit: 1000,
   });
@@ -296,6 +296,7 @@ export function Settings() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="bo">La Paz (GMT-4)</SelectItem>
                     <SelectItem value="mx">Ciudad de México (GMT-6)</SelectItem>
                     <SelectItem value="ny">Nueva York (GMT-5)</SelectItem>
                     <SelectItem value="la">Los Ángeles (GMT-8)</SelectItem>
@@ -333,6 +334,7 @@ export function Settings() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="bob">Bs - Boliviano</SelectItem>
                     <SelectItem value="mxn">MXN - Peso Mexicano</SelectItem>
                     <SelectItem value="usd">USD - Dólar Americano</SelectItem>
                   </SelectContent>

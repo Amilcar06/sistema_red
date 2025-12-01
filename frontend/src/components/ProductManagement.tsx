@@ -231,7 +231,7 @@ export function ProductManagement() {
                                 </p>
                                 <div className="mt-4 flex items-center justify-between">
                                     <span className="text-lg font-bold text-blue-600">
-                                        ${Number(product.precio).toFixed(2)}
+                                        Bs {Number(product.precio).toFixed(2)}
                                     </span>
                                     <div className="flex space-x-2">
                                         <Button variant="ghost" size="icon" onClick={() => openEditModal(product)}>

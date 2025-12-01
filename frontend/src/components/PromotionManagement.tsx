@@ -223,7 +223,7 @@ export function PromotionManagement() {
     if (promotion.tipoDescuento === 'PORCENTAJE') {
       return `${promotion.valorDescuento}%`;
     }
-    return `$${promotion.valorDescuento}`;
+    return `Bs ${promotion.valorDescuento}`;
   };
 
   // Calcular tasa de conversión
@@ -329,7 +329,7 @@ export function PromotionManagement() {
                 </div>
                 <div>
                   <Label htmlFor="valorDescuento">
-                    {formData.tipoDescuento === 'PORCENTAJE' ? 'Porcentaje (%)' : formData.tipoDescuento === 'MONTO_FIJO' ? 'Monto ($)' : 'Valor'}
+                    {formData.tipoDescuento === 'PORCENTAJE' ? 'Porcentaje (%)' : formData.tipoDescuento === 'MONTO_FIJO' ? 'Monto (Bs)' : 'Valor'}
                   </Label>
                   <Input
                     id="valorDescuento"

@@ -481,6 +481,125 @@ async function main() {
 
   console.log(`✅ ${conversiones.length} conversiones de ejemplo creadas\n`);
 
+  // 7. Crear Configuración del Sistema (Bolivia)
+  console.log('⚙️  Creando configuración del sistema...');
+
+  const configuraciones = [
+    { clave: 'companyName', valor: 'Entel Bolivia (Demo)', categoria: 'general' },
+    { clave: 'timezone', valor: 'bo', categoria: 'general' }, // America/La_Paz
+    { clave: 'language', valor: 'es', categoria: 'general' },
+    { clave: 'currency', valor: 'bob', categoria: 'general' }, // Boliviano
+    { clave: 'dailyLimit', valor: 5000, categoria: 'general' },
+    { clave: 'hourlyLimit', valor: 500, categoria: 'general' },
+  ];
+
+  await Promise.all(
+    configuraciones.map((config) =>
+      prisma.configuracionSistema.upsert({
+        where: { clave: config.clave },
+        update: { valor: config.valor },
+        create: {
+          clave: config.clave,
+          valor: config.valor,
+          categoria: config.categoria,
+        },
+      })
+    )
+  );
+
+  console.log('✅ Configuración del sistema creada (Contexto Boliviano)\n');
+
+  // 8. Crear Reglas de Negocio
+  console.log('rules  Creando reglas de negocio...');
+
+  const reglas = [
+    {
+      nombre: 'Cliente Fiel > 1 Año',
+      descripcion: 'Clientes con antigüedad mayor a 1 año',
+      tipoRegla: 'ELEGIBILIDAD',
+      condiciones: JSON.stringify({
+        operador: 'AND',
+        criterios: [
+          { campo: 'antiguedad_dias', operador: 'GT', valor: 365 }
+        ]
+      }),
+      acciones: JSON.stringify({ permitir: true }),
+      prioridad: 1,
+    },
+    {
+      nombre: 'Alto Valor Postpago',
+      descripcion: 'Clientes con planes postpago mayores a 50 Bs',
+      tipoRegla: 'ELEGIBILIDAD',
+      condiciones: JSON.stringify({
+        operador: 'AND',
+        criterios: [
+          { campo: 'plan_precio', operador: 'GT', valor: 50 },
+          { campo: 'categoria', operador: 'EQ', valor: 'POSTPAGO' }
+        ]
+      }),
+      acciones: JSON.stringify({ permitir: true }),
+      prioridad: 2,
+    },
+    {
+      nombre: 'Horario Fin de Semana',
+      descripcion: 'Solo enviar notificaciones sábados y domingos',
+      tipoRegla: 'PROGRAMACION',
+      condiciones: JSON.stringify({
+        operador: 'OR',
+        criterios: [
+          { campo: 'dia_semana', operador: 'EQ', valor: 6 }, // Sábado
+          { campo: 'dia_semana', operador: 'EQ', valor: 0 }  // Domingo
+        ]
+      }),
+      acciones: JSON.stringify({ ventana_envio: '09:00-20:00' }),
+      prioridad: 1,
+    }
+  ];
+
+  const reglasCreadas = await Promise.all(
+    reglas.map((regla) =>
+      prisma.reglaNegocio.create({
+        data: {
+          nombre: regla.nombre,
+          descripcion: regla.descripcion,
+          tipoRegla: regla.tipoRegla as any,
+          condiciones: regla.condiciones,
+          acciones: regla.acciones,
+          prioridad: regla.prioridad,
+        },
+      })
+    )
+  );
+
+  console.log(`✅ ${reglasCreadas.length} reglas de negocio creadas\n`);
+
+  // 9. Vincular Reglas a Promociones
+  console.log('🔗 Vinculando reglas a promociones...');
+
+  // Vincular "Alto Valor" a "25% OFF Planes Postpago" (promocion3)
+  const reglaAltoValor = reglasCreadas.find(r => r.nombre === 'Alto Valor Postpago');
+  if (reglaAltoValor) {
+    await prisma.promocionRegla.create({
+      data: {
+        promocionId: promocion3.id,
+        reglaId: reglaAltoValor.id,
+      }
+    });
+  }
+
+  // Vincular "Cliente Fiel" a "Paquete Bicentenario" (promocion4)
+  const reglaFiel = reglasCreadas.find(r => r.nombre === 'Cliente Fiel > 1 Año');
+  if (reglaFiel) {
+    await prisma.promocionRegla.create({
+      data: {
+        promocionId: promocion4.id,
+        reglaId: reglaFiel.id,
+      }
+    });
+  }
+
+  console.log('✅ Reglas vinculadas a promociones\n');
+
   // Resumen final
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('✅ SEED EDUCATIVO COMPLETADO');
@@ -491,6 +610,8 @@ async function main() {
   console.log(`🎁 Promociones: 5 (inspiradas en Entel)`);
   console.log(`📬 Notificaciones: ${notificaciones.length} (historial de ejemplo)`);
   console.log(`✅ Conversiones: ${conversiones.length} (ejemplo)`);
+  console.log(`⚙️  Configuración: Sistema configurado para Bolivia (Bs, La Paz)`);
+  console.log(`rules Reglas: ${reglasCreadas.length} reglas creadas y vinculadas`);
   console.log('');
   console.log('⚠️  RECORDATORIO:');
   console.log('   - Todos los datos son FICTICIOS y EDUCATIVOS');
