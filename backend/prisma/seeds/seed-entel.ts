@@ -217,16 +217,23 @@ async function main() {
   console.log('👥 Creando clientes ficticios (La Paz, Bolivia)...');
 
   const clientes = await Promise.all(
-    nombres.map((nombre, index) => {
+    nombres.map((nombreCompleto, index) => {
       const plan = planes[Math.floor(Math.random() * planes.length)];
       const fechaRegistro = new Date();
       fechaRegistro.setDate(fechaRegistro.getDate() - Math.floor(Math.random() * 365));
 
+      const partesNombre = nombreCompleto.split(' ');
+      const nombre = partesNombre[0];
+      const paterno = partesNombre[1] || '';
+      const materno = partesNombre.length > 2 ? partesNombre[2] : undefined;
+
       return prisma.cliente.create({
         data: {
           nombre,
+          paterno,
+          materno,
           telefono: generarTelefono(),
-          correo: generarCorreo(nombre),
+          correo: generarCorreo(nombreCompleto),
           plan,
           estado: Math.random() > 0.2 ? 'ACTIVO' : 'INACTIVO',
           fechaRegistro,

@@ -71,6 +71,19 @@ export default apiClient;
 export interface ApiResponse<T = any> {
   status: 'success' | 'error';
   data?: T;
+  datos?: T;
+  paginacion?: {
+    pagina: number;
+    limite: number;
+    total: number;
+    totalPaginas: number;
+  };
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
   message?: string;
   errors?: any[];
 }

@@ -3,6 +3,8 @@ import apiClient, { ApiResponse, PaginatedResponse } from '../config/api';
 export interface Client {
   id: string;
   nombre: string;
+  paterno: string;
+  materno?: string;
   telefono: string;
   correo?: string;
   plan: string;
@@ -16,6 +18,8 @@ export interface Client {
 
 export interface CreateClientData {
   nombre: string;
+  paterno: string;
+  materno?: string;
   telefono: string;
   correo?: string;
   plan: string;
@@ -59,7 +63,7 @@ class ClientService {
     if (response.data.status === 'success') {
       // El backend devuelve { datos, paginacion } directamente
       const backendData = response.data.datos || response.data.data || [];
-      const backendPagination = response.data.paginacion || response.data.pagination || {
+      const backendPagination: any = response.data.paginacion || response.data.pagination || {
         pagina: 1,
         limite: 10,
         total: 0,

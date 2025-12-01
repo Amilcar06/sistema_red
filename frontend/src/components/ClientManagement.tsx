@@ -28,6 +28,8 @@ import { toast } from 'sonner';
 
 interface ClientFormData {
   nombre: string;
+  paterno: string;
+  materno: string;
   telefono: string;
   correo: string;
   plan: string;
@@ -36,6 +38,8 @@ interface ClientFormData {
 
 const INITIAL_FORM_DATA: ClientFormData = {
   nombre: '',
+  paterno: '',
+  materno: '',
   telefono: '',
   correo: '',
   plan: '',
@@ -127,6 +131,8 @@ export function ClientManagement() {
     setEditingClient(client);
     setFormData({
       nombre: client.nombre,
+      paterno: client.paterno,
+      materno: client.materno || '',
       telefono: client.telefono,
       correo: client.correo || '',
       plan: client.plan,
@@ -143,6 +149,8 @@ export function ClientManagement() {
     try {
       const clientData: CreateClientData = {
         nombre: formData.nombre,
+        paterno: formData.paterno,
+        materno: formData.materno || undefined,
         telefono: formData.telefono,
         correo: formData.correo || undefined,
         plan: formData.plan,
@@ -211,14 +219,37 @@ export function ClientManagement() {
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="nombre">Nombre</Label>
+                  <Input
+                    id="nombre"
+                    placeholder="Ej: Juan"
+                    value={formData.nombre}
+                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="paterno">Apellido Paterno</Label>
+                  <Input
+                    id="paterno"
+                    placeholder="Ej: Pérez"
+                    value={formData.paterno}
+                    onChange={(e) => setFormData({ ...formData, paterno: e.target.value })}
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+              </div>
               <div>
-                <Label htmlFor="nombre">Nombre Completo</Label>
+                <Label htmlFor="materno">Apellido Materno (Opcional)</Label>
                 <Input
-                  id="nombre"
-                  placeholder="Ej: Juan Pérez"
-                  value={formData.nombre}
-                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                  required
+                  id="materno"
+                  placeholder="Ej: López"
+                  value={formData.materno || ''}
+                  onChange={(e) => setFormData({ ...formData, materno: e.target.value })}
                   disabled={isSubmitting}
                 />
               </div>
@@ -366,7 +397,9 @@ export function ClientManagement() {
                     return (
                       <tr key={client.id} className="border-b hover:bg-gray-50">
                         <td className="p-4">
-                          <div className="font-medium">{client.nombre}</div>
+                          <div className="font-medium">
+                            {client.nombre} {client.paterno} {client.materno}
+                          </div>
                         </td>
                         <td className="p-4">
                           <div className="space-y-1">

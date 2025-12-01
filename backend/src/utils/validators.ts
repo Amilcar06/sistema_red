@@ -21,6 +21,8 @@ export const loginSchema = z.object({
 export const createClientSchema = z.object({
   body: z.object({
     nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+    paterno: z.string().min(2, 'El apellido paterno debe tener al menos 2 caracteres'),
+    materno: z.string().optional(),
     telefono: z.string().min(8, 'El teléfono debe tener al menos 8 caracteres'),
     correo: z.string().email('Correo inválido').optional().or(z.literal('')),
     plan: z.string().min(1, 'El plan es requerido'),
@@ -31,6 +33,8 @@ export const createClientSchema = z.object({
 export const updateClientSchema = z.object({
   body: z.object({
     nombre: z.string().min(2).optional(),
+    paterno: z.string().min(2).optional(),
+    materno: z.string().optional(),
     telefono: z.string().min(8).optional(),
     correo: z.string().email().optional().or(z.literal('')),
     plan: z.string().optional(),

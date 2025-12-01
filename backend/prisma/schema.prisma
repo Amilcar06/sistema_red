@@ -33,6 +33,8 @@ enum RolUsuario {
 model Cliente {
   id                 String         @id @default(uuid())
   nombre             String
+  paterno            String
+  materno            String?
   telefono           String
   correo             String?
   plan               String

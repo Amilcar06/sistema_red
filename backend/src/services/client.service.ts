@@ -4,6 +4,8 @@ import cacheService from './cache.service';
 
 interface CreateClientData {
   nombre: string;
+  paterno: string;
+  materno?: string;
   telefono: string;
   correo?: string;
   plan: string;
@@ -12,7 +14,8 @@ interface CreateClientData {
 
 interface UpdateClientData extends Partial<CreateClientData> { }
 
-interface ClientFilters {
+export interface ClientFilters {
+  search?: string;
   busqueda?: string;
   estado?: string;
   plan?: string;
@@ -34,6 +37,8 @@ class ClientService {
     const cliente = await prisma.cliente.create({
       data: {
         nombre: data.nombre,
+        paterno: data.paterno,
+        materno: data.materno,
         telefono: data.telefono,
         correo: data.correo,
         plan: data.plan,
@@ -62,11 +67,13 @@ class ClientService {
     const skip = (paginaNum - 1) * limiteNum;
     const where: any = {};
 
-    if (busqueda) {
+    if (filters.search) {
       where.OR = [
-        { nombre: { contains: busqueda, mode: 'insensitive' } },
-        { telefono: { contains: busqueda } },
-        { correo: { contains: busqueda, mode: 'insensitive' } },
+        { nombre: { contains: filters.search, mode: 'insensitive' } },
+        { paterno: { contains: filters.search, mode: 'insensitive' } },
+        { materno: { contains: filters.search, mode: 'insensitive' } },
+        { telefono: { contains: filters.search, mode: 'insensitive' } },
+        { correo: { contains: filters.search, mode: 'insensitive' } },
       ];
     }
 
@@ -146,7 +153,13 @@ class ClientService {
     return prisma.cliente.update({
       where: { id },
       data: {
-        ...data,
+        nombre: data.nombre,
+        paterno: data.paterno,
+        materno: data.materno,
+        telefono: data.telefono,
+        correo: data.correo,
+        plan: data.plan,
+        estado: data.estado,
         fechaUltimaActividad: new Date(),
       },
     });
