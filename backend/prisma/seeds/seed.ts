@@ -24,9 +24,9 @@ async function main() {
 
   const admin = await prisma.usuario.create({
     data: {
-      correo: 'admin@example.com',
+      correo: 'admin@empresa.bo',
       contrasena: hashedPassword,
-      nombre: 'Administrador',
+      nombre: 'Administrador Sistema',
       rol: 'ADMIN',
       activo: true,
     },
@@ -43,9 +43,9 @@ async function main() {
   const operatorPassword = await bcrypt.hash('operador123', 12);
   const operator = await prisma.usuario.create({
     data: {
-      correo: 'operador@example.com',
+      correo: 'operador@empresa.bo',
       contrasena: operatorPassword,
-      nombre: 'Operador',
+      nombre: 'Operador Ventas',
       rol: 'OPERADOR',
       activo: true,
     },

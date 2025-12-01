@@ -134,8 +134,9 @@ export function ProductManagement() {
                 </div>
                 <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                     <DialogTrigger asChild>
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" /> Nuevo Producto
+                        <Button className="bg-blue-600 hover:bg-blue-700">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Nueva Producto
                         </Button>
                     </DialogTrigger>
                     <DialogContent>

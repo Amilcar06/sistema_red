@@ -45,11 +45,13 @@ const planes = [
   'FIBRA-150',
 ];
 
-// Generar número de teléfono ficticio (formato Bolivia)
+// Generar número de teléfono ficticio (formato Bolivia: 8 dígitos)
 function generarTelefono(): string {
-  const prefijos = ['700', '701', '702', '703', '710', '720', '730'];
+  // Prefijos comunes en Bolivia (Entel, Tigo, Viva)
+  const prefijos = ['60', '61', '62', '63', '64', '65', '67', '68', '69', '70', '71', '72', '73', '74', '75', '76', '77', '78'];
   const prefijo = prefijos[Math.floor(Math.random() * prefijos.length)];
-  const numero = Math.floor(1000000 + Math.random() * 9000000);
+  // Necesitamos 6 dígitos más para completar los 8
+  const numero = Math.floor(100000 + Math.random() * 900000);
   return `+591${prefijo}${numero}`;
 }
 
@@ -66,7 +68,7 @@ async function main() {
 
   // 1. Crear usuarios administrativos
   console.log('👤 Creando usuarios administrativos...');
-  
+
   const hashedAdmin = await bcrypt.hash('admin123', 12);
   const admin = await prisma.usuario.upsert({
     where: { correo: 'admin@entel-educativo.bo' },
@@ -195,14 +197,14 @@ async function main() {
       const existente = await prisma.producto.findFirst({
         where: { nombre: producto.nombre },
       });
-      
+
       if (existente) {
         return prisma.producto.update({
           where: { id: existente.id },
           data: producto,
         });
       }
-      
+
       return prisma.producto.create({
         data: producto,
       });
@@ -242,7 +244,7 @@ async function main() {
   const ahora = new Date();
   const enUnaSemana = new Date(ahora);
   enUnaSemana.setDate(enUnaSemana.getDate() + 7);
-  
+
   const enUnMes = new Date(ahora);
   enUnMes.setMonth(enUnMes.getMonth() + 1);
 
@@ -408,10 +410,10 @@ async function main() {
       const promocion = [promocion1, promocion2, promocion3][Math.floor(Math.random() * 3)];
       const canal = canales[Math.floor(Math.random() * canales.length)];
       const estado = estados[Math.floor(Math.random() * estados.length)];
-      
+
       const fechaCreacion = new Date();
       fechaCreacion.setDate(fechaCreacion.getDate() - Math.floor(Math.random() * 30));
-      
+
       // Todos los estados ya son enviados (no pendientes), así que siempre hay fechaEnviado
       const fechaEnviado = new Date(fechaCreacion.getTime() + Math.random() * 3600000);
 
@@ -440,7 +442,7 @@ async function main() {
   const conversiones = await Promise.all(
     clientes.slice(0, 8).map(async (cliente) => {
       const promocion = [promocion1, promocion2, promocion3][Math.floor(Math.random() * 3)];
-      
+
       return prisma.clientePromocion.create({
         data: {
           clienteId: cliente.id,
@@ -456,21 +458,21 @@ async function main() {
   await Promise.all([
     prisma.promocion.update({
       where: { id: promocion1.id },
-      data: { 
+      data: {
         totalEnviados: notificaciones.filter((n) => n.promocionId === promocion1.id).length,
         totalConvertidos: conversiones.filter((c) => c.promocionId === promocion1.id).length,
       },
     }),
     prisma.promocion.update({
       where: { id: promocion2.id },
-      data: { 
+      data: {
         totalEnviados: notificaciones.filter((n) => n.promocionId === promocion2.id).length,
         totalConvertidos: conversiones.filter((c) => c.promocionId === promocion2.id).length,
       },
     }),
     prisma.promocion.update({
       where: { id: promocion3.id },
-      data: { 
+      data: {
         totalEnviados: notificaciones.filter((n) => n.promocionId === promocion3.id).length,
         totalConvertidos: conversiones.filter((c) => c.promocionId === promocion3.id).length,
       },
