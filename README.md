@@ -242,7 +242,8 @@ RATE_LIMIT_WINDOW_MS=60000
 Crear archivo `frontend/.env`:
 
 ```env
-VITE_API_URL=http://localhost:3001/api/v1
+VITE_API_URL=http://localhost:3001
+VITE_API_VERSION=v1
 ```
 
 ---
