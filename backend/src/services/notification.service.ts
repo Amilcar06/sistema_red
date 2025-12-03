@@ -3,6 +3,8 @@ import { AppError } from '../utils/errors';
 import twilioService from './integrations/twilio.service';
 import emailService from './integrations/email.service';
 import whatsappService from './whatsapp.service'; // Added whatsappService import
+import firebaseService from './integrations/firebase.service';
+import { logger } from '../utils/logger';
 import Bull, { Queue, Job } from 'bull';
 import redisConfig from '../config/redis';
 

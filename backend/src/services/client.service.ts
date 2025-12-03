@@ -165,6 +165,31 @@ class ClientService {
     });
   }
 
+  async savePushToken(id: string, token: string) {
+    const cliente = await prisma.cliente.findUnique({
+      where: { id },
+    });
+
+    if (!cliente) {
+      throw new AppError('Cliente no encontrado', 404);
+    }
+
+    // Actualizar metadata con el nuevo token
+    // Mantenemos la metadata existente y agregamos/actualizamos el pushToken
+    const currentMetadata = (cliente.metadata as any) || {};
+    const updatedMetadata = {
+      ...currentMetadata,
+      pushToken: token,
+    };
+
+    return prisma.cliente.update({
+      where: { id },
+      data: {
+        metadata: updatedMetadata,
+      },
+    });
+  }
+
   async delete(id: string) {
     const cliente = await prisma.cliente.findUnique({
       where: { id },

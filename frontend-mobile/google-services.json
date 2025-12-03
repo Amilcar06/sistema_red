@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "567252238590",
+    "project_id": "telepromo-app",
+    "storage_bucket": "telepromo-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:567252238590:android:b52fb2074a94e8bd41e5af",
+        "android_client_info": {
+          "package_name": "com.red.telepromo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABuEJgtQJMpxVjdM4qoWNxUgzZOmiIov8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

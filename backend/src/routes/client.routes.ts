@@ -35,5 +35,11 @@ router
   )
   .delete(authorize('ADMIN'), clientController.delete);
 
+router.post(
+  '/:id/push-token',
+  authorize('ADMIN', 'OPERADOR', 'VISOR'), // Permitir a usuarios autenticados (ajustar roles según necesidad, VISOR podría ser el rol por defecto de clientes)
+  clientController.savePushToken
+);
+
 export default router;
 
