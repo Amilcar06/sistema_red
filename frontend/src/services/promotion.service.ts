@@ -76,10 +76,10 @@ class PromotionService {
       return {
         data: backendData,
         pagination: {
-          page: backendPagination.pagina || backendPagination.page || 1,
-          limit: backendPagination.limite || backendPagination.limit || 10,
-          total: backendPagination.total || 0,
-          totalPages: backendPagination.totalPaginas || backendPagination.totalPages || 0,
+          page: (backendPagination as any).pagina || (backendPagination as any).page || 1,
+          limit: (backendPagination as any).limite || (backendPagination as any).limit || 10,
+          total: (backendPagination as any).total || 0,
+          totalPages: (backendPagination as any).totalPaginas || (backendPagination as any).totalPages || 0,
         },
       };
     }
@@ -172,6 +172,17 @@ class PromotionService {
   async getStatuses(): Promise<string[]> {
     const response = await apiClient.get<ApiResponse<string[]>>('/promotions/statuses');
     return response.data.data || [];
+  }
+
+  async launch(id: string, canal: string, plantillaMensaje?: string): Promise<any> {
+    const response = await apiClient.post<ApiResponse<any>>(`/promotions/${id}/launch`, {
+      canal,
+      plantillaMensaje
+    });
+    if (response.data.status === 'success' && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || 'Error al lanzar promoción');
   }
 }
 

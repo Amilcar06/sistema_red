@@ -145,7 +145,7 @@ export function MessageCenter() {
 
     try {
       const channel = formData.channel === 'EMAIL' ? 'CORREO' : formData.channel;
-      await notificationService.sendBulk(
+      await promotionService.launch(
         formData.promotionId,
         channel as 'SMS' | 'WHATSAPP' | 'CORREO',
         formData.message

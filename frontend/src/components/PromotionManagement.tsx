@@ -62,6 +62,12 @@ export function PromotionManagement() {
   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
   const [formData, setFormData] = useState<PromotionFormData>(INITIAL_FORM_DATA);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false);
+  const [campaignData, setCampaignData] = useState({
+    channel: 'WHATSAPP',
+    messageTemplate: '',
+  });
+  const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
 
   // Cargar promociones
   const loadPromotions = async () => {
@@ -180,6 +186,26 @@ export function PromotionManagement() {
       if (editingPromotion) {
         await promotionService.update(editingPromotion.id, promotionData);
         toast.success('Promoción actualizada correctamente');
+
+        // Si hay datos de campaña, intentar lanzarla
+        if (campaignData.messageTemplate) {
+          try {
+            await promotionService.launch(
+              editingPromotion.id,
+              campaignData.channel,
+              campaignData.messageTemplate
+            );
+            toast.success('Campaña lanzada exitosamente');
+            setIsCampaignDialogOpen(false);
+            setCampaignData({
+              channel: 'WHATSAPP',
+              messageTemplate: '',
+            });
+          } catch (launchError: any) {
+            console.error('Error launching campaign:', launchError);
+            toast.error('Promoción actualizada, pero error al lanzar campaña: ' + launchError.message);
+          }
+        }
       } else {
         await promotionService.create(promotionData);
         toast.success('Promoción creada correctamente');

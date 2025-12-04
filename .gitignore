@@ -83,3 +83,4 @@ temp/
 # Archivos de documentación temporal (opcional - si quieres ignorarlos)
 # DOCUMENTACION_CONSOLIDADA.md
 
+backend/src/config/firebase-service-account.json
