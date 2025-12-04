@@ -75,13 +75,15 @@ REDIS_PORT=6379
 
 #### 5. Inicialización de Bases de Datos
 
-Para los servicios que usan SQL (Clients, Promotions), ejecuta las migraciones y los seeds (datos de prueba):
+El sistema utiliza una base de datos PostgreSQL compartida. Debes ejecutar las migraciones y el seed principal desde `clients-service`:
 
 ```bash
-# En clients-service y promotions-service
+# En clients-service (Carga el esquema y datos de prueba completos)
 npm run prisma:migrate
 npm run prisma:seed
 ```
+
+> **Nota:** Los otros servicios (`promotions`, `notifications`) comparten el mismo esquema Prisma, por lo que no es necesario correr migraciones en ellos si ya se hicieron en `clients-service`.
 
 ---
 

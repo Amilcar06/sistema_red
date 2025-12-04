@@ -9,9 +9,9 @@ El sistema ha sido migrado de un monolito a una arquitectura de microservicios d
 | Servicio | Puerto | Descripción | Tecnologías |
 | :--- | :--- | :--- | :--- |
 | **API Gateway** | `3001` | Punto de entrada único. Enrutamiento, Rate Limiting y Auth preliminar. | Express, Http-Proxy-Middleware |
-| **Clients Service** | `3002` | Gestión de Clientes, Usuarios, Autenticación y Metadata. | Node.js, PostgreSQL, MongoDB |
-| **Promotions Service** | `3003` | Gestión de Promociones, Productos y Reglas de Negocio. | Node.js, PostgreSQL |
-| **Notifications Service** | `3004` | Envío de mensajes (Email, WhatsApp, Push) y Logs. | Node.js, MongoDB, BullMQ |
+| **Clients Service** | `3002` | Gestión de Clientes, Usuarios, Autenticación y Metadata. | Node.js, PostgreSQL (Shared), MongoDB |
+| **Promotions Service** | `3003` | Gestión de Promociones, Productos y Reglas de Negocio. | Node.js, PostgreSQL (Shared) |
+| **Notifications Service** | `3004` | Envío de mensajes (Email, WhatsApp, Push) y Logs. | Node.js, PostgreSQL (Shared), MongoDB, BullMQ |
 | **Frontend Web** | `3000` | Panel de Administración para operadores. | React, Vite, TailwindCSS |
 | **Frontend Mobile** | - | App para clientes finales. | React Native, Expo |
 

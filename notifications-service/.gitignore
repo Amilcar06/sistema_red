@@ -7,3 +7,6 @@ coverage/
 *.tsbuildinfo
 .prisma/
 
+
+# Secrets
+src/config/firebase-service-account.json

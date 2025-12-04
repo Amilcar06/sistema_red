@@ -85,19 +85,23 @@ src/
 
 ## 🗄️ Bases de Datos
 
-El sistema utiliza un enfoque de **Database-per-Service** para asegurar el desacoplamiento.
+El sistema utiliza una arquitectura híbrida con una base de datos relacional compartida y una base de datos documental para logs.
 
-### 1. PostgreSQL (Clients & Promotions)
-Utilizado para datos relacionales y transaccionales críticos.
+### 1. PostgreSQL (Compartida)
+Utilizada por **Clients**, **Promotions** y **Notifications Service**. Contiene el esquema unificado del negocio.
 
-**Esquema Clients Service:**
+**Tablas Principales:**
 - `users`: Operadores del sistema.
-- `clients`: Clientes finales de la telefonía.
-
-**Esquema Promotions Service:**
-- `products`: Productos o servicios ofrecidos.
+- `clients`: Clientes finales.
+- `products`: Productos o servicios.
 - `promotions`: Campañas promocionales.
-- `rules`: Reglas de negocio para elegibilidad.
+- `notifications`: Registro transaccional de notificaciones.
+
+### 2. MongoDB (Notifications)
+Utilizado exclusivamente por el **Notifications Service** para logs de auditoría de alto volumen y datos no estructurados.
+
+**Colecciones:**
+- `notification_logs`: Historial detallado de envíos y respuestas de proveedores.
 
 ### 2. MongoDB (Notifications)
 Utilizado para datos voluminosos y no estructurados como logs de notificaciones.

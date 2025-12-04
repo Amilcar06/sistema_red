@@ -4,24 +4,55 @@ import { catchAsync } from '../utils/helpers';
 
 class DashboardController {
     getStats = catchAsync(async (req: Request, res: Response) => {
-        const [totalClientes, clientesActivos] = await Promise.all([
+        const [
+            totalClientes,
+            clientesActivos,
+            activePromotions,
+            promotionsStats,
+            channelStats
+        ] = await Promise.all([
             prisma.cliente.count(),
             prisma.cliente.count({ where: { estado: 'ACTIVO' } }),
+            prisma.promocion.count({ where: { estado: 'ACTIVA' } }),
+            prisma.promocion.aggregate({
+                _sum: {
+                    totalEnviados: true,
+                    totalConvertidos: true
+                }
+            }),
+            prisma.notificacion.groupBy({
+                by: ['canal'],
+                _count: {
+                    canal: true
+                }
+            })
         ]);
 
-        // Mock data for other services (Promotions, Notifications)
-        // In a real microservices env, we would aggregate this via API calls or events
+        const totalMessages = promotionsStats._sum.totalEnviados || 0;
+        const totalConversions = promotionsStats._sum.totalConvertidos || 0;
+
+        // Process channel stats
+        let smsCount = 0;
+        let whatsappCount = 0;
+        let emailCount = 0;
+
+        channelStats.forEach((stat) => {
+            if (stat.canal === 'SMS') smsCount += stat._count.canal;
+            else if (stat.canal === 'WHATSAPP') whatsappCount += stat._count.canal;
+            else if (stat.canal === 'CORREO') emailCount += stat._count.canal;
+        });
+
         const stats = {
             totalClients: totalClientes,
-            activePromotions: 5, // Mock
-            totalMessages: 150, // Mock
-            totalConversions: 12, // Mock
+            activePromotions,
+            totalMessages,
+            totalConversions,
         };
 
         const channelData = [
-            { name: 'SMS', value: 45 },
-            { name: 'WhatsApp', value: 80 },
-            { name: 'Email', value: 25 },
+            { name: 'SMS', value: smsCount },
+            { name: 'WhatsApp', value: whatsappCount },
+            { name: 'Email', value: emailCount },
         ];
 
         res.json({

@@ -109,22 +109,14 @@ DATABASE_URL="postgresql://..." npm run prisma:migrate
 ### Backend - Servicios
 - [x] auth.service.test.ts
 - [x] client.service.test.ts
-- [ ] product.service.test.ts
-- [ ] promotion.service.test.ts
-- [ ] notification.service.test.ts
-- [ ] rule.service.test.ts
 
 ### Backend - Endpoints (Integración)
 - [x] auth.integration.test.ts
 - [ ] client.integration.test.ts
-- [ ] product.integration.test.ts
-- [ ] promotion.integration.test.ts
-- [ ] notification.integration.test.ts
 
 ### Backend - Middleware
 - [ ] auth.middleware.test.ts
 - [ ] validation.middleware.test.ts
-- [ ] error.middleware.test.ts
 
 ## 🎯 Mejores Prácticas
 
