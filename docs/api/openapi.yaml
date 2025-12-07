@@ -1,0 +1,302 @@
+openapi: 3.1.0
+info:
+  title: Sistema de Promoción de Servicios API
+  version: 1.0.0
+  description: |
+    API Gateway para el Sistema de Promoción de Servicios.
+    Integra los microservicios de Clientes, Promociones y Notificaciones.
+servers:
+  - url: http://localhost:3001
+    description: Local API Gateway
+  - url: https://api.dev.misistema.com
+    description: Development Environment
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # --- Shared/Common Types ---
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        statusCode:
+          type: integer
+
+    # --- Client Service Schemas ---
+    Client:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nombre:
+          type: string
+        paterno:
+          type: string
+        telefono:
+          type: string
+        email:
+          type: string
+          format: email
+        plan:
+          type: string
+          enum: [PREPAGO, POSTPAGO]
+        estado:
+          type: string
+          enum: [ACTIVO, INACTIVO, SUSPENDIDO]
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateClientRequest:
+      type: object
+      required: [nombre, telefono, plan]
+      properties:
+        nombre:
+          type: string
+        paterno:
+          type: string
+        telefono:
+          type: string
+        email:
+          type: string
+        plan:
+          type: string
+
+    # --- Promotion Service Schemas ---
+    Promotion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nombre:
+          type: string
+        descripcion:
+          type: string
+        tipoDescuento:
+          type: string
+          enum: [PORCENTAJE, MONTO_FIJO]
+        valorDescuento:
+          type: number
+        fechaInicio:
+          type: string
+          format: date-time
+        fechaFin:
+          type: string
+          format: date-time
+        estado:
+          type: string
+          enum: [BORRADOR, ACTIVA, PAUSADA, FINALIZADA]
+
+    CreatePromotionRequest:
+      type: object
+      required: [nombre, tipoDescuento, valorDescuento, fechaInicio, fechaFin]
+      properties:
+        nombre:
+          type: string
+        descripcion:
+          type: string
+        tipoDescuento:
+          type: string
+        valorDescuento:
+          type: number
+        fechaInicio:
+          type: string
+          format: date-time
+        fechaFin:
+          type: string
+          format: date-time
+
+    # --- Notification Service Schemas ---
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        destinatario:
+          type: string
+        mensaje:
+          type: string
+        canal:
+          type: string
+          enum: [SMS, WHATSAPP, PUSH, EMAIL]
+        estado:
+          type: string
+          enum: [PENDIENTE, ENVIADO, FALLIDO, LEIDO]
+        sentAt:
+          type: string
+          format: date-time
+
+security:
+  - BearerAuth: []
+
+paths:
+  # --- Auth ---
+  /api/auth/login:
+    post:
+      summary: Iniciar sesión
+      tags: [Auth]
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Estructura con token JWT
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    type: object
+
+  # --- Clients ---
+  /api/clients:
+    get:
+      summary: Listar clientes
+      tags: [Clients]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Lista paginada de clientes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Client'
+                  total:
+                    type: integer
+    post:
+      summary: Crear cliente
+      tags: [Clients]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClientRequest'
+      responses:
+        '201':
+          description: Cliente creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+
+  /api/clients/{id}:
+    get:
+      summary: Obtener cliente por ID
+      tags: [Clients]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalles del cliente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+
+  # --- Promotions ---
+  /api/promotions:
+    get:
+      summary: Listar promociones
+      tags: [Promotions]
+      responses:
+        '200':
+          description: Lista de promociones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Promotion'
+    post:
+      summary: Crear promoción
+      tags: [Promotions]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePromotionRequest'
+      responses:
+        '201':
+          description: Promoción creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Promotion'
+
+  /api/promotions/{id}/activate:
+    post:
+      summary: Activar promoción
+      tags: [Promotions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Promoción activada
+
+  # --- Notifications ---
+  /api/notifications/send:
+    post:
+      summary: Enviar notificación individual
+      tags: [Notifications]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [destinatario, mensaje, canal]
+              properties:
+                destinatario:
+                  type: string
+                mensaje:
+                  type: string
+                canal:
+                  type: string
+                  enum: [SMS, WHATSAPP, EMAIL]
+      responses:
+        '200':
+          description: Notificación encolada/enviada

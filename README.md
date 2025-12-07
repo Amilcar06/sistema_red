@@ -6,11 +6,22 @@ Este proyecto es una plataforma integral para la gestión y promoción de servic
 
 Para una comprensión profunda del sistema, consulta los siguientes documentos:
 
-- **[Arquitectura del Sistema](docs/ARCHITECTURE.md)**: Visión general de la arquitectura de microservicios, diagrama de flujo de datos y decisiones técnicas.
-- **[Esquema de Base de Datos](docs/DATABASE_SCHEMA.md)**: Diagramas ER y descripción detallada de los modelos de datos (PostgreSQL & MongoDB).
-- **[Referencia de API](docs/API_REFERENCE.md)**: Documentación consolidada de todos los endpoints públicos expuestos por el API Gateway.
-- **[Guía de Desarrollo](docs/GUIA_DESARROLLO.md)**: Estándares de código, flujo de trabajo Git y estrategias de testing.
-- **[Guía Técnica](docs/ARCHITECTURE.md)**: (Redirigido a Arquitectura) Detalles profundos sobre la implementación.
+### Arquitectura y API
+- **[Arquitectura del Sistema](docs/ARCHITECTURE.md)**: Visión general y decisiones técnicas.
+- **[Referencia de API](docs/API_REFERENCE.md)**: Resumen de endpoints.
+- **[Especificación OpenAPI](docs/api/openapi.yaml)**: Definición formal (Swagger).
+- **[Diccionario de Datos](docs/data/DATA_DICTIONARY.md)**: Modelos de BD y migraciones.
+
+### Operaciones y Seguridad
+- **[Seguridad y Cumplimiento](docs/security/SECURITY_AND_COMPLIANCE.md)**: RBAC, Protección de datos y Auditoría.
+- **[Runbooks Operativos](docs/ops/RUNBOOKS.md)**: Despliegue, Backup y Rollback.
+- **[Plan de Pruebas](docs/testing/TEST_PLAN.md)**: Estrategia de QA.
+- **[Guía de Integración](docs/integration/INTEGRATION_GUIDE.md)**: Adaptadores para SMS/Billing y Multi-operador.
+
+### Manuales
+- **[Guía de Inicio Rápido (Dev)](docs/manuals/QUICKSTART_DEV.md)**: Setup de entorno local.
+- **[Manual de Usuario](docs/manuals/USER_MANUAL.md)**: Operación de la plataforma.
+- **[Guía de Desarrollo](docs/GUIA_DESARROLLO.md)**: Estándares de código.
 
 ### Documentación por Servicio
 

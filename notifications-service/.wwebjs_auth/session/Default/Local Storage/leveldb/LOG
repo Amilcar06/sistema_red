@@ -1,3 +1,6 @@
-2025/12/04-09:46:59.743 8103 Reusing MANIFEST /Users/amilcaryujra/Desktop/Sistema de Promoción de Servicios/notifications-service/.wwebjs_auth/session/Default/Local Storage/leveldb/MANIFEST-000001
-2025/12/04-09:46:59.745 8103 Recovering log #4
-2025/12/04-09:46:59.746 8103 Reusing old log /Users/amilcaryujra/Desktop/Sistema de Promoción de Servicios/notifications-service/.wwebjs_auth/session/Default/Local Storage/leveldb/000004.log 
+2025/12/04-18:11:29.728 a403 Reusing MANIFEST /Users/amilcaryujra/Desktop/Sistema de Promoción de Servicios/notifications-service/.wwebjs_auth/session/Default/Local Storage/leveldb/MANIFEST-000001
+2025/12/04-18:11:29.729 a403 Recovering log #4
+2025/12/04-18:11:29.731 a403 Reusing old log /Users/amilcaryujra/Desktop/Sistema de Promoción de Servicios/notifications-service/.wwebjs_auth/session/Default/Local Storage/leveldb/000004.log 
+2025/12/04-18:12:30.930 b403 Level-0 table #8: started
+2025/12/04-18:12:30.937 b403 Level-0 table #8: 23659 bytes OK
+2025/12/04-18:12:30.945 b403 Delete type=0 #4

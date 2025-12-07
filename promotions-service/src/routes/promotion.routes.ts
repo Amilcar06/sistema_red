@@ -3,6 +3,7 @@ import { authenticate, authorize } from '../middleware/auth.middleware';
 import promotionController from '../controllers/promotion.controller';
 import { validate } from '../middleware/validation.middleware';
 import { createPromotionSchema } from '../utils/validators';
+import promotionAudienceController from '../controllers/promotion-audience.controller';
 
 const router = Router();
 
@@ -29,6 +30,13 @@ router
   .get(promotionController.findById)
   .patch(authorize('ADMIN', 'OPERADOR'), promotionController.update)
   .delete(authorize('ADMIN'), promotionController.delete);
+
+
+
+// Rutas de Audiencia
+router.get('/:id/audience', promotionAudienceController.getAudience);
+router.post('/:id/audience/clients', authorize('ADMIN', 'OPERADOR'), promotionAudienceController.addClient);
+router.delete('/:id/audience/clients/:clienteId', authorize('ADMIN', 'OPERADOR'), promotionAudienceController.removeClient);
 
 export default router;
 

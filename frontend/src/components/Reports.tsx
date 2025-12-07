@@ -36,6 +36,8 @@ export function Reports() {
     { channel: 'WhatsApp', envios: 0, conversiones: 0, tasaConversion: 0 },
     { channel: 'Email', envios: 0, conversiones: 0, tasaConversion: 0 },
   ]);
+  const [conversionData, setConversionData] = useState<any[]>([]);
+  const [revenueData, setRevenueData] = useState<any[]>([]);
 
   const loadReportData = async () => {
     try {
@@ -46,8 +48,8 @@ export function Reports() {
 
       setStats(data.stats);
       setChannelPerformance(data.channelPerformance);
-      // setConversionData(data.conversionData); // If we make this dynamic
-      // setRevenueData(data.revenueData); // If we make this dynamic
+      setConversionData(data.conversionData);
+      setRevenueData(data.revenueData);
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'Error al cargar datos del reporte';
       setError(errorMessage);
@@ -62,23 +64,7 @@ export function Reports() {
     loadReportData();
   }, []);
 
-  // Generar datos semanales (últimas 4 semanas) basado en notificaciones
-  const conversionData = [
-    { week: 'Sem 1', conversiones: Math.round(stats.totalConversions * 0.25), envios: Math.round(stats.totalMessages * 0.25) },
-    { week: 'Sem 2', conversiones: Math.round(stats.totalConversions * 0.30), envios: Math.round(stats.totalMessages * 0.30) },
-    { week: 'Sem 3', conversiones: Math.round(stats.totalConversions * 0.25), envios: Math.round(stats.totalMessages * 0.25) },
-    { week: 'Sem 4', conversiones: Math.round(stats.totalConversions * 0.20), envios: Math.round(stats.totalMessages * 0.20) },
-  ];
 
-  // Datos de ingresos (placeholder - requeriría datos históricos reales)
-  const revenueData = [
-    { month: 'Jun', ingresos: 0, gastos: 0 },
-    { month: 'Jul', ingresos: 0, gastos: 0 },
-    { month: 'Ago', ingresos: 0, gastos: 0 },
-    { month: 'Sep', ingresos: 0, gastos: 0 },
-    { month: 'Oct', ingresos: 0, gastos: 0 },
-    { month: 'Nov', ingresos: stats.totalConversions * 100, gastos: stats.totalMessages * 0.1 },
-  ];
 
   const handleDownload = async (format: 'pdf' | 'excel') => {
     try {

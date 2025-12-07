@@ -249,6 +249,69 @@ class PromotionService {
       throw new AppError('Error al enviar notificaciones: ' + (error.response?.data?.message || error.message), 502);
     }
   }
+
+  async addClient(promocionId: string, clienteId: string) {
+    const promocion = await this.findById(promocionId);
+
+    // Verificar si ya existe la relación
+    const existing = await prisma.clientePromocion.findUnique({
+      where: {
+        clienteId_promocionId: {
+          clienteId,
+          promocionId,
+        },
+      },
+    });
+
+    if (existing) {
+      throw new AppError('El cliente ya está asignado a esta promoción', 400);
+    }
+
+    return prisma.clientePromocion.create({
+      data: {
+        promocionId,
+        clienteId,
+        estado: 'PENDIENTE',
+      },
+    });
+  }
+
+  async removeClient(promocionId: string, clienteId: string) {
+    return prisma.clientePromocion.delete({
+      where: {
+        clienteId_promocionId: {
+          clienteId,
+          promocionId,
+        },
+      },
+    });
+  }
+
+  async getAudience(promocionId: string) {
+    const promocion = await prisma.promocion.findUnique({
+      where: { id: promocionId },
+      include: {
+        clientes: {
+          include: {
+            cliente: true,
+          },
+          orderBy: {
+            fechaCreacion: 'desc',
+          },
+        },
+      },
+    });
+
+    if (!promocion) {
+      throw new AppError('Promoción no encontrada', 404);
+    }
+
+    return promocion.clientes.map((cp) => ({
+      ...cp.cliente,
+      estadoPromocion: cp.estado,
+      fechaAsignacion: cp.fechaCreacion,
+    }));
+  }
 }
 
 export default new PromotionService();

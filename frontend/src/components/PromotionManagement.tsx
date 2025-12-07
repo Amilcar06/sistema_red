@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Play, Pause, Calendar, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Play, Pause, Calendar, Loader2, Users, Search, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -24,6 +24,7 @@ import {
 import { Alert, AlertDescription } from './ui/alert';
 import promotionService, { Promotion, CreatePromotionData } from '../services/promotion.service';
 import productService from '../services/product.service';
+import clientService, { Client } from '../services/client.service';
 import { toast } from 'sonner';
 
 interface PromotionFormData {
@@ -68,6 +69,14 @@ export function PromotionManagement() {
     messageTemplate: '',
   });
   const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
+
+  // Audience Management State
+  const [isAudienceDialogOpen, setIsAudienceDialogOpen] = useState(false);
+  const [clientSearchQuery, setClientSearchQuery] = useState('');
+  const [clientSearchResults, setClientSearchResults] = useState<Client[]>([]);
+  const [audienceList, setAudienceList] = useState<any[]>([]);
+  const [isSearchingClients, setIsSearchingClients] = useState(false);
+  const [isAudienceLoading, setIsAudienceLoading] = useState(false);
 
   // Cargar promociones
   const loadPromotions = async () => {
@@ -280,6 +289,75 @@ export function PromotionManagement() {
   const getConversionRate = (promotion: Promotion) => {
     if (promotion.totalEnviados === 0) return 0;
     return ((promotion.totalConvertidos / promotion.totalEnviados) * 100).toFixed(1);
+  };
+
+  // Audience Management Handlers
+  const handleOpenAudienceDialog = async (promotion: Promotion) => {
+    setSelectedPromotion(promotion);
+    setIsAudienceDialogOpen(true);
+    setClientSearchQuery('');
+    setClientSearchResults([]);
+    await handleLoadAudience(promotion.id);
+  };
+
+  const handleLoadAudience = async (promotionId: string) => {
+    try {
+      setIsAudienceLoading(true);
+      const audience = await promotionService.getAudience(promotionId);
+      setAudienceList(audience);
+    } catch (error) {
+      console.error('Error loading audience:', error);
+      toast.error('Error al cargar la audiencia');
+    } finally {
+      setIsAudienceLoading(false);
+    }
+  };
+
+  const handleSearchClients = async () => {
+    if (!clientSearchQuery.trim()) return;
+
+    try {
+      setIsSearchingClients(true);
+      const response = await clientService.findAll({
+        search: clientSearchQuery,
+        limit: 5
+      });
+      setClientSearchResults(response.data);
+    } catch (error) {
+      console.error('Error searching clients:', error);
+      toast.error('Error al buscar clientes');
+    } finally {
+      setIsSearchingClients(false);
+    }
+  };
+
+  const handleAddClient = async (client: Client) => {
+    if (!selectedPromotion) return;
+
+    try {
+      await promotionService.addClient(selectedPromotion.id, client.id);
+      toast.success('Cliente agregado correctamente');
+      await handleLoadAudience(selectedPromotion.id);
+      // Limpiar búsqueda
+      setClientSearchResults([]);
+      setClientSearchQuery('');
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || 'Error al agregar cliente';
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleRemoveClient = async (clientId: string) => {
+    if (!selectedPromotion) return;
+
+    try {
+      await promotionService.removeClient(selectedPromotion.id, clientId);
+      toast.success('Cliente removido correctamente');
+      await handleLoadAudience(selectedPromotion.id);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || 'Error al remover cliente';
+      toast.error(errorMessage);
+    }
   };
 
   // Estadísticas
@@ -628,6 +706,14 @@ export function PromotionManagement() {
                       <Button
                         variant="outline"
                         size="sm"
+                        onClick={() => handleOpenAudienceDialog(promo)}
+                        title="Gestionar Audiencia"
+                      >
+                        <Users className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => handleDelete(promo.id)}
                       >
                         <Trash2 className="w-4 h-4 text-red-600" />
@@ -640,6 +726,110 @@ export function PromotionManagement() {
           })}
         </div>
       )}
+
+      {/* Audience Management Dialog */}
+      <Dialog open={isAudienceDialogOpen} onOpenChange={setIsAudienceDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Gestionar Audiencia: {selectedPromotion?.nombre}</DialogTitle>
+            <DialogDescription>
+              Agrega o remueve clientes de esta promoción manualmente.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 mt-4">
+            {/* Search Section */}
+            <div className="space-y-2">
+              <Label>Buscar Cliente</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Nombre, teléfono o correo..."
+                  value={clientSearchQuery}
+                  onChange={(e) => setClientSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearchClients()}
+                />
+                <Button onClick={handleSearchClients} disabled={isSearchingClients}>
+                  {isSearchingClients ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                </Button>
+              </div>
+
+              {/* Search Results */}
+              {clientSearchResults.length > 0 && (
+                <div className="border rounded-md p-2 mt-2 bg-gray-50">
+                  <p className="text-sm font-medium text-gray-500 mb-2">Resultados de búsqueda:</p>
+                  <div className="space-y-2">
+                    {clientSearchResults.map(client => (
+                      <div key={client.id} className="flex items-center justify-between bg-white p-2 rounded border">
+                        <div>
+                          <p className="font-medium">{client.nombre} {client.paterno}</p>
+                          <p className="text-xs text-gray-500">{client.telefono} - {client.plan}</p>
+                        </div>
+                        <Button size="sm" onClick={() => handleAddClient(client)}>
+                          <Plus className="w-4 h-4 mr-1" /> Agregar
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Current Audience List */}
+            <div>
+              <h3 className="font-medium mb-2">Audiencia Actual ({audienceList.length})</h3>
+              {isAudienceLoading ? (
+                <div className="flex justify-center p-4">
+                  <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                </div>
+              ) : audienceList.length === 0 ? (
+                <div className="text-center p-4 border rounded-md border-dashed text-gray-500">
+                  No hay clientes asignados manualmente.
+                </div>
+              ) : (
+                <div className="border rounded-md overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left">Nombre</th>
+                        <th className="px-4 py-2 text-left">Teléfono</th>
+                        <th className="px-4 py-2 text-left">Estado</th>
+                        <th className="px-4 py-2 text-right">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {audienceList.map((client) => (
+                        <tr key={client.id}>
+                          <td className="px-4 py-2">{client.nombre} {client.paterno}</td>
+                          <td className="px-4 py-2">{client.telefono}</td>
+                          <td className="px-4 py-2">
+                            <Badge variant="outline" className={
+                              client.estadoPromocion === 'PENDIENTE' ? 'bg-yellow-50 text-yellow-700' :
+                                client.estadoPromocion === 'ENVIADA' ? 'bg-blue-50 text-blue-700' :
+                                  'bg-gray-50'
+                            }>
+                              {client.estadoPromocion}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-2 text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                              onClick={() => handleRemoveClient(client.id)}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

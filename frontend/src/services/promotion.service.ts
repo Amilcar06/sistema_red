@@ -166,7 +166,7 @@ class PromotionService {
 
   async getSegments(): Promise<string[]> {
     const response = await apiClient.get<ApiResponse<string[]>>('/promotions/segments');
-    return response.data.data;
+    return response.data.data || [];
   }
 
   async getStatuses(): Promise<string[]> {
@@ -183,6 +183,31 @@ class PromotionService {
       return response.data.data;
     }
     throw new Error(response.data.message || 'Error al lanzar promoción');
+  }
+
+  async getAudience(id: string): Promise<any[]> {
+    const response = await apiClient.get<ApiResponse<any[]>>(`/promotions/${id}/audience`);
+    if (response.data.status === 'success') {
+      return response.data.data || [];
+    }
+    throw new Error(response.data.message || 'Error al obtener audiencia');
+  }
+
+  async addClient(id: string, clienteId: string): Promise<any> {
+    const response = await apiClient.post<ApiResponse<any>>(`/promotions/${id}/audience/clients`, {
+      clienteId
+    });
+    if (response.data.status === 'success') {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || 'Error al agregar cliente');
+  }
+
+  async removeClient(id: string, clienteId: string): Promise<void> {
+    const response = await apiClient.delete<ApiResponse<any>>(`/promotions/${id}/audience/clients/${clienteId}`);
+    if (response.data.status !== 'success') {
+      throw new Error(response.data.message || 'Error al remover cliente');
+    }
   }
 }
 
