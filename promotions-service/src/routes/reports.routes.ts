@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getDashboardStats, exportReport } from '../controllers/reports.controller';
+import reportsController from '../controllers/reports.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -16,7 +16,7 @@ router.use(authenticate);
  *       200:
  *         description: Estadísticas generales
  */
-router.get('/dashboard', authorize('ADMIN', 'OPERADOR'), getDashboardStats);
+router.get('/dashboard', authorize('ADMIN', 'OPERADOR'), reportsController.getDashboardStats);
 
 /**
  * @swagger
@@ -45,6 +45,6 @@ router.get('/dashboard', authorize('ADMIN', 'OPERADOR'), getDashboardStats);
  *               type: string
  *               format: binary
  */
-router.get('/export', authorize('ADMIN', 'OPERADOR'), exportReport);
+router.get('/export', authorize('ADMIN', 'OPERADOR'), reportsController.exportReport);
 
 export default router;

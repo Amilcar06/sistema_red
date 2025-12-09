@@ -68,11 +68,18 @@ export function Reports() {
 
   const handleDownload = async (format: 'pdf' | 'excel') => {
     try {
-      const response = await apiClient.get(`/reports/export?format=${format}`, {
-        responseType: 'blob',
+      // Usar directamente la URL del servicio de reportes (3003)
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(`http://localhost:3003/api/v1/reports/export?format=${format}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      if (!response.ok) throw new Error('Error en la descarga');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `reporte.${format === 'excel' ? 'xlsx' : 'pdf'}`);

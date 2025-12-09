@@ -26,7 +26,7 @@ class ReportsController {
         }));
 
         if (format === 'pdf') {
-            await reportExportService.generatePDF(dataToExport, res);
+            await reportExportService.generatePDF(dataToExport, stats.stats, res);
         } else if (format === 'excel') {
             await reportExportService.generateExcel(dataToExport, res);
         } else {

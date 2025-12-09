@@ -74,7 +74,9 @@ Cada componente del sistema tiene su propia documentación detallada:
     # En terminales separadas para cada servicio
     cd api-gateway && npm run dev
     cd clients-service && npm run dev
-    # ... etc
+    cd promotions-service && npm run dev
+    cd notifications-service && npm run dev
+    cd frontend && npm run dev
     ```
 
 ## 🏗 Resumen de Arquitectura

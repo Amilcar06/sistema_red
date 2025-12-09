@@ -1,4 +1,23 @@
-import apiClient, { ApiResponse } from '../config/api';
+import axios from 'axios';
+import { ApiResponse } from '../config/api';
+
+const REPORTS_API_URL = 'http://localhost:3003/api/v1';
+
+const reportsApi = axios.create({
+    baseURL: REPORTS_API_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    withCredentials: true,
+});
+
+reportsApi.interceptors.request.use((config) => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
 
 export interface ReportStats {
     conversionRate: number;
@@ -36,7 +55,7 @@ export interface ReportsData {
 
 class ReportsService {
     async getStats(): Promise<ReportsData> {
-        const response = await apiClient.get<ApiResponse<ReportsData>>('/reports/dashboard');
+        const response = await reportsApi.get<ApiResponse<ReportsData>>('/reports/dashboard');
 
         if (response.data.status === 'success' && response.data.data) {
             return response.data.data;
