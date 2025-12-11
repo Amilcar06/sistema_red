@@ -136,48 +136,48 @@ export function Reports() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="text-gray-600 text-sm">Tasa de Conversión</div>
-              <TrendingUp className="w-5 h-5 text-green-600" />
+              <div className="text-muted-foreground text-sm">Tasa de Conversión</div>
+              <TrendingUp className="w-5 h-5 text-primary" />
             </div>
-            <div className="text-3xl mb-1">{stats.conversionRate}%</div>
-            <div className="text-green-600 text-sm">Basado en datos reales</div>
+            <div className="text-3xl mb-1 font-bold">{stats.conversionRate}%</div>
+            <div className="text-muted-foreground text-sm">Basado en datos reales</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="text-gray-600 text-sm">Clientes Activos</div>
-              <Users className="w-5 h-5 text-blue-600" />
+              <div className="text-muted-foreground text-sm">Clientes Activos</div>
+              <Users className="w-5 h-5 text-secondary" />
             </div>
-            <div className="text-3xl mb-1">{stats.activeClients.toLocaleString()}</div>
-            <div className="text-green-600 text-sm">Total registrados</div>
+            <div className="text-3xl mb-1 font-bold">{stats.activeClients.toLocaleString()}</div>
+            <div className="text-muted-foreground text-sm">Total registrados</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-6">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0 mb-4">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 Mensajes Enviados
               </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <div className="text-3xl mb-1">{stats.totalMessages.toLocaleString()}</div>
-            <div className="text-green-600 text-sm">Total acumulado</div>
+            <div className="text-3xl mb-1 font-bold">{stats.totalMessages.toLocaleString()}</div>
+            <div className="text-muted-foreground text-sm">Total acumulado</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-6">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0 mb-4">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 Costo Estimado
               </CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <div className="text-3xl mb-1">{stats.totalConversions.toLocaleString()}</div>
-            <div className="text-green-600 text-sm">Total acumulado</div>
+            <div className="text-3xl mb-1 font-bold">{stats.totalConversions.toLocaleString()}</div>
+            <div className="text-muted-foreground text-sm">Total acumulado</div>
           </CardContent>
         </Card>
       </div>
@@ -190,24 +190,31 @@ export function Reports() {
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={conversionData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="week" />
-              <YAxis />
-              <Tooltip />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+              <XAxis dataKey="week" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}`} />
+              <Tooltip
+                contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                itemStyle={{ color: 'var(--foreground)' }}
+              />
               <Legend />
               <Line
                 type="monotone"
                 dataKey="conversiones"
-                stroke="#10b981"
+                stroke="#FF6B00"
                 strokeWidth={2}
                 name="Conversiones"
+                dot={{ r: 4, fill: '#FF6B00' }}
+                activeDot={{ r: 6 }}
               />
               <Line
                 type="monotone"
                 dataKey="envios"
-                stroke="#3b82f6"
+                stroke="#0A192F"
                 strokeWidth={2}
                 name="Envíos"
+                dot={{ r: 4, fill: '#0A192F' }}
+                activeDot={{ r: 6 }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -223,17 +230,17 @@ export function Reports() {
           <div className="overflow-x-auto mb-6">
             <table className="w-full">
               <thead>
-                <tr className="border-b">
-                  <th className="text-left p-4">Canal</th>
-                  <th className="text-left p-4">Mensajes Enviados</th>
-                  <th className="text-left p-4">Conversiones</th>
-                  <th className="text-left p-4">Tasa Conversión</th>
+                <tr className="border-b border-border">
+                  <th className="text-left p-4 text-muted-foreground font-medium">Canal</th>
+                  <th className="text-left p-4 text-muted-foreground font-medium">Mensajes Enviados</th>
+                  <th className="text-left p-4 text-muted-foreground font-medium">Conversiones</th>
+                  <th className="text-left p-4 text-muted-foreground font-medium">Tasa Conversión</th>
                 </tr>
               </thead>
               <tbody>
                 {channelPerformance.map((channel) => (
-                  <tr key={channel.channel} className="border-b">
-                    <td className="p-4">{channel.channel}</td>
+                  <tr key={channel.channel} className="border-b border-border hover:bg-muted/50 transition-colors">
+                    <td className="p-4 font-medium">{channel.channel}</td>
                     <td className="p-4">{channel.envios.toLocaleString()}</td>
                     <td className="p-4">{channel.conversiones.toLocaleString()}</td>
                     <td className="p-4">
@@ -249,13 +256,16 @@ export function Reports() {
 
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={channelPerformance}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="channel" />
-              <YAxis />
-              <Tooltip />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+              <XAxis dataKey="channel" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+              <Tooltip
+                contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                cursor={{ fill: 'var(--muted)' }}
+              />
               <Legend />
-              <Bar dataKey="envios" fill="#3b82f6" name="Envíos" />
-              <Bar dataKey="conversiones" fill="#10b981" name="Conversiones" />
+              <Bar dataKey="envios" fill="#0A192F" name="Envíos" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="conversiones" fill="#FF6B00" name="Conversiones" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -269,17 +279,20 @@ export function Reports() {
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={revenueData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+              <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+              <Tooltip
+                contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+              />
               <Legend />
               <Area
                 type="monotone"
                 dataKey="ingresos"
                 stackId="1"
-                stroke="#10b981"
-                fill="#10b981"
+                stroke="#22c55e"
+                fill="#22c55e"
+                fillOpacity={0.2}
                 name="Ingresos"
               />
               <Area
@@ -288,27 +301,28 @@ export function Reports() {
                 stackId="2"
                 stroke="#ef4444"
                 fill="#ef4444"
+                fillOpacity={0.2}
                 name="Gastos"
               />
             </AreaChart>
           </ResponsiveContainer>
 
-          <div className="grid grid-cols-3 gap-4 mt-6">
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-gray-600 text-sm mb-1">Ingreso Estimado</div>
-              <div className="text-2xl text-green-600">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <div className="text-center p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+              <div className="text-muted-foreground text-sm mb-1">Ingreso Estimado</div>
+              <div className="text-2xl font-bold text-green-600">
                 ${(stats.totalConversions * 100).toLocaleString()}
               </div>
             </div>
-            <div className="text-center p-4 bg-red-50 rounded-lg">
-              <div className="text-gray-600 text-sm mb-1">Gasto Estimado</div>
-              <div className="text-2xl text-red-600">
+            <div className="text-center p-4 bg-destructive/10 rounded-lg border border-destructive/20">
+              <div className="text-muted-foreground text-sm mb-1">Gasto Estimado</div>
+              <div className="text-2xl font-bold text-destructive">
                 ${(stats.totalMessages * 0.1).toLocaleString()}
               </div>
             </div>
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-gray-600 text-sm mb-1">Ganancia Neta</div>
-              <div className="text-2xl text-blue-600">
+            <div className="text-center p-4 bg-secondary/10 rounded-lg border border-secondary/20">
+              <div className="text-muted-foreground text-sm mb-1">Ganancia Neta</div>
+              <div className="text-2xl font-bold text-secondary">
                 ${((stats.totalConversions * 100) - (stats.totalMessages * 0.1)).toLocaleString()}
               </div>
             </div>

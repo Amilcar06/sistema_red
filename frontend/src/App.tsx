@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { Login } from './components/Login';
+import { Loader2 } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { ClientManagement } from './components/ClientManagement';
@@ -57,12 +59,30 @@ function AppContent() {
   );
 }
 
+function AppRoutes() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  return isAuthenticated ? (
+    <ProtectedRoute>
+      <AppContent />
+    </ProtectedRoute>
+  ) : (
+    <Login />
+  );
+}
+
 export default function App() {
   return (
     <AuthProvider>
-      <ProtectedRoute>
-        <AppContent />
-      </ProtectedRoute>
+      <AppRoutes />
     </AuthProvider>
   );
 }

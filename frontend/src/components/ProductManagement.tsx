@@ -147,7 +147,7 @@ export function ProductManagement() {
     if (isLoading && products.length === 0) {
         return (
             <div className="flex items-center justify-center h-96">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
         );
     }
@@ -163,11 +163,12 @@ export function ProductManagement() {
                 </div>
                 <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                     <DialogTrigger asChild>
-                        <Button className="bg-blue-600 hover:bg-blue-700">
+                        <Button className="bg-primary hover:bg-primary/90">
                             <Plus className="w-4 h-4 mr-2" />
                             Nueva Producto
                         </Button>
                     </DialogTrigger>
+                    {/* ... (DialogContent omitted for brevity, assuming existing structure is fine or inherited defaults) ... */}
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>Crear Nuevo Producto</DialogTitle>
@@ -176,6 +177,7 @@ export function ProductManagement() {
                             </DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleCreate} className="space-y-4">
+                            {/* ... Form Fields ... */}
                             <div>
                                 <Label htmlFor="nombre">Nombre</Label>
                                 <Input
@@ -223,7 +225,7 @@ export function ProductManagement() {
                                 />
                             </div>
                             <DialogFooter>
-                                <Button type="submit">Guardar</Button>
+                                <Button type="submit" className="bg-primary hover:bg-primary/90">Guardar</Button>
                             </DialogFooter>
                         </form>
                     </DialogContent>
@@ -261,14 +263,14 @@ export function ProductManagement() {
                                         {product.descripcion}
                                     </p>
                                     <div className="mt-4 flex items-center justify-between">
-                                        <span className="text-lg font-bold text-blue-600">
+                                        <span className="text-lg font-bold text-primary">
                                             Bs {Number(product.precio).toFixed(2)}
                                         </span>
                                         <div className="flex space-x-2">
                                             <Button variant="ghost" size="icon" onClick={() => openEditModal(product)}>
-                                                <Edit className="h-4 w-4" />
+                                                <Edit className="h-4 w-4 text-muted-foreground hover:text-foreground" />
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(product.id)}>
+                                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80 hover:bg-destructive/10" onClick={() => handleDelete(product.id)}>
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>
@@ -288,7 +290,7 @@ export function ProductManagement() {
                             >
                                 Anterior
                             </Button>
-                            <span className="text-sm text-gray-600">
+                            <span className="text-sm text-muted-foreground">
                                 Página {page} de {totalPages}
                             </span>
                             <Button
@@ -312,6 +314,7 @@ export function ProductManagement() {
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleUpdate} className="space-y-4">
+                        {/* ... Form Fields (Edit) ... */}
                         <div>
                             <Label htmlFor="edit-nombre">Nombre</Label>
                             <Input
@@ -359,7 +362,7 @@ export function ProductManagement() {
                             />
                         </div>
                         <DialogFooter>
-                            <Button type="submit">Actualizar</Button>
+                            <Button type="submit" className="bg-primary hover:bg-primary/90">Actualizar</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>

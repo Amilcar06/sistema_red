@@ -7,9 +7,9 @@ class ReportExportService {
         const doc = new PDFDocument({ margin: 50 });
 
         // Colors
-        const PRIMARY_COLOR = '#E4601A'; // Naranja corporativo
-        const ACCENT_COLOR = '#333333';
-        const TABLE_HEADER_COLOR = '#F3F4F6';
+        const PRIMARY_COLOR = '#FF6B00'; // Naranja Voltio
+        const ACCENT_COLOR = '#0A192F';  // Azul Abismo
+        const TABLE_HEADER_COLOR = '#F0F4F8'; // Cool Gray for headers
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=reporte_rendimiento.pdf');

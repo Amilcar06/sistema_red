@@ -184,7 +184,7 @@ export function MessageCenter() {
       case 'EN_COLA':
         return <Clock className="w-4 h-4 text-yellow-600" />;
       case 'FALLIDA':
-        return <XCircle className="w-4 h-4 text-red-600" />;
+        return <XCircle className="w-4 h-4 text-destructive" />;
       default:
         return null;
     }
@@ -192,15 +192,15 @@ export function MessageCenter() {
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { label: string; className: string }> = {
-      'ENVIADA': { label: 'Enviada', className: 'bg-green-100 text-green-800' },
-      'ENTREGADA': { label: 'Entregada', className: 'bg-blue-100 text-blue-800' },
-      'PENDIENTE': { label: 'Pendiente', className: 'bg-yellow-100 text-yellow-800' },
-      'EN_COLA': { label: 'En Cola', className: 'bg-yellow-100 text-yellow-800' },
-      'FALLIDA': { label: 'Fallida', className: 'bg-red-100 text-red-800' },
-      'CANCELADA': { label: 'Cancelada', className: 'bg-gray-100 text-gray-800' },
+      'ENVIADA': { label: 'Enviada', className: 'bg-green-500/10 text-green-600 border-green-500/20 border' },
+      'ENTREGADA': { label: 'Entregada', className: 'bg-primary/10 text-primary border-primary/20 border' },
+      'PENDIENTE': { label: 'Pendiente', className: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20 border' },
+      'EN_COLA': { label: 'En Cola', className: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20 border' },
+      'FALLIDA': { label: 'Fallida', className: 'bg-destructive/10 text-destructive border-destructive/20 border' },
+      'CANCELADA': { label: 'Cancelada', className: 'bg-muted text-muted-foreground border-muted-foreground/30 border' },
     };
 
-    return statusMap[status] || { label: status, className: 'bg-gray-100 text-gray-800' };
+    return statusMap[status] || { label: status, className: 'bg-muted text-muted-foreground border-muted-foreground/30 border' };
   };
 
   // Estadísticas
@@ -211,8 +211,8 @@ export function MessageCenter() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl mb-2">Centro de Mensajería</h1>
-        <p className="text-gray-600">Envía mensajes y gestiona comunicaciones</p>
+        <h1 className="text-3xl mb-2 font-bold tracking-tight">Centro de Mensajería</h1>
+        <p className="text-muted-foreground">Envía mensajes y gestiona comunicaciones</p>
       </div>
 
       <Tabs defaultValue="send" className="w-full">
@@ -227,12 +227,12 @@ export function MessageCenter() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <div className="bg-blue-100 p-3 rounded-lg">
-                    <Phone className="w-6 h-6 text-blue-600" />
+                  <div className="bg-primary/10 p-3 rounded-lg">
+                    <Phone className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <div className="text-gray-600 text-sm">SMS Enviados</div>
-                    <div className="text-2xl">{smsCount.toLocaleString()}</div>
+                    <div className="text-muted-foreground text-sm">SMS Enviados</div>
+                    <div className="text-2xl font-bold">{smsCount.toLocaleString()}</div>
                   </div>
                 </div>
               </CardContent>
@@ -240,12 +240,12 @@ export function MessageCenter() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <div className="bg-green-100 p-3 rounded-lg">
+                  <div className="bg-green-500/10 p-3 rounded-lg">
                     <MessageSquare className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <div className="text-gray-600 text-sm">WhatsApp Enviados</div>
-                    <div className="text-2xl">{whatsappCount.toLocaleString()}</div>
+                    <div className="text-muted-foreground text-sm">WhatsApp Enviados</div>
+                    <div className="text-2xl font-bold">{whatsappCount.toLocaleString()}</div>
                   </div>
                 </div>
               </CardContent>
@@ -253,12 +253,12 @@ export function MessageCenter() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <div className="bg-orange-100 p-3 rounded-lg">
-                    <Mail className="w-6 h-6 text-orange-600" />
+                  <div className="bg-secondary/10 p-3 rounded-lg">
+                    <Mail className="w-6 h-6 text-secondary" />
                   </div>
                   <div>
-                    <div className="text-gray-600 text-sm">Emails Enviados</div>
-                    <div className="text-2xl">{emailCount.toLocaleString()}</div>
+                    <div className="text-muted-foreground text-sm">Emails Enviados</div>
+                    <div className="text-2xl font-bold">{emailCount.toLocaleString()}</div>
                   </div>
                 </div>
               </CardContent>
@@ -337,7 +337,7 @@ export function MessageCenter() {
                     required
                     disabled={isSending}
                   />
-                  <p className="text-sm text-gray-500 mt-2">
+                  <p className="text-sm text-muted-foreground mt-2">
                     Variables disponibles: {'{nombre}'}, {'{plan}'}, {'{descuento}'}
                   </p>
                 </div>
@@ -346,7 +346,7 @@ export function MessageCenter() {
                   {formData.promotionId && formData.promotionId !== 'none' ? (
                     <Button
                       type="button"
-                      className="flex-1 bg-blue-600 hover:bg-blue-700"
+                      className="flex-1 bg-primary hover:bg-primary/90"
                       onClick={handleSendBulk}
                       disabled={isSending}
                     >
@@ -365,7 +365,7 @@ export function MessageCenter() {
                   ) : (
                     <Button
                       type="submit"
-                      className="flex-1 bg-blue-600 hover:bg-blue-700"
+                      className="flex-1 bg-primary hover:bg-primary/90"
                       disabled={isSending}
                     >
                       {isSending ? (
@@ -411,7 +411,7 @@ export function MessageCenter() {
                     </SelectContent>
                   </Select>
                   <select
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full md:w-40"
+                    className="px-4 py-2 border border-input rounded-lg bg-background focus:ring-2 focus:ring-ring focus:border-ring w-full md:w-40"
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
                   >
@@ -434,10 +434,10 @@ export function MessageCenter() {
 
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
               ) : messages.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
+                <div className="text-center py-12 text-muted-foreground">
                   No se encontraron mensajes
                 </div>
               ) : (
@@ -447,7 +447,7 @@ export function MessageCenter() {
                     return (
                       <div
                         key={message.id}
-                        className="flex items-start gap-4 p-4 border rounded-lg hover:bg-gray-50"
+                        className="flex items-start gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                       >
                         <div className="mt-1">{getStatusIcon(message.estado)}</div>
                         <div className="flex-1">
@@ -455,15 +455,15 @@ export function MessageCenter() {
                             {message.titulo && (
                               <span className="font-medium">{message.titulo}</span>
                             )}
-                            <Badge variant="outline" className="flex items-center gap-1">
+                            <Badge variant="outline" className="flex items-center gap-1 border-border">
                               {getChannelIcon(message.canal)}
                               <span className="capitalize">
                                 {message.canal === 'CORREO' ? 'Email' : message.canal}
                               </span>
                             </Badge>
                           </div>
-                          <p className="text-gray-600 text-sm mb-2">{message.mensaje}</p>
-                          <div className="flex items-center gap-4 text-xs text-gray-400">
+                          <p className="text-muted-foreground text-sm mb-2">{message.mensaje}</p>
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground/60">
                             {message.fechaEnviado && (
                               <span>Enviado: {new Date(message.fechaEnviado).toLocaleString('es-MX')}</span>
                             )}
@@ -472,7 +472,7 @@ export function MessageCenter() {
                             )}
                           </div>
                           {message.mensajeError && (
-                            <p className="text-red-600 text-xs mt-1">{message.mensajeError}</p>
+                            <p className="text-destructive text-xs mt-1">{message.mensajeError}</p>
                           )}
                         </div>
                         <Badge className={status.className}>{status.label}</Badge>

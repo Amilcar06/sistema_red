@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, ActivityIndicator, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { authService } from '../services/auth.service';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -24,7 +24,9 @@ export default function LoginScreen({ navigation }: Props) {
 
         setLoading(true);
         try {
-            await authService.login(email, password);
+            const cleanEmail = email.trim().toLowerCase();
+            const cleanPassword = password.trim();
+            await authService.login(cleanEmail, cleanPassword);
             navigation.replace('Home');
         } catch (error) {
             Alert.alert('Error', 'Credenciales inválidas o error de conexión');
@@ -34,86 +36,144 @@ export default function LoginScreen({ navigation }: Props) {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>GastroSmart</Text>
-            <Text style={styles.subtitle}>Iniciar Sesión</Text>
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+            <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+                <View style={styles.logoContainer}>
+                    {/* Image handling with resizeMode contain to respect aspect ratio */}
+                    <Image
+                        source={require('../../assets/logo.png')}
+                        style={styles.logo}
+                        resizeMode="contain"
+                    />
+                    <Text style={styles.appName}>TelePromo</Text>
+                    <Text style={styles.subtitle}>Gestión de Promociones</Text>
+                </View>
 
-            <View style={styles.formContainer}>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Correo Electrónico"
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Contraseña"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                />
+                <View style={styles.formContainer}>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Correo Electrónico</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="ejemplo@empresa.com"
+                            placeholderTextColor="#9CA3AF"
+                            value={email}
+                            onChangeText={setEmail}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                        />
+                    </View>
 
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={handleLogin}
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <ActivityIndicator color="white" />
-                    ) : (
-                        <Text style={styles.buttonText}>Iniciar Sesión</Text>
-                    )}
-                </TouchableOpacity>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Contraseña</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="••••••••"
+                            placeholderTextColor="#9CA3AF"
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry
+                        />
+                    </View>
 
-                <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.registerLink}>
-                    <Text style={styles.registerText}>¿No tienes cuenta? Regístrate</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={handleLogin}
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <ActivityIndicator color="white" />
+                        ) : (
+                            <Text style={styles.buttonText}>Iniciar Sesión</Text>
+                        )}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.registerLink}>
+                        <Text style={styles.registerText}>¿No tienes cuenta? <Text style={styles.linkBold}>Regístrate</Text></Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#fff',
-        padding: 20,
+        backgroundColor: '#F9FAFB', // Ligero gris de fondo
     },
-    title: {
-        fontSize: 28,
+    scrollContainer: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        padding: 24,
+    },
+    logoContainer: {
+        alignItems: 'center',
+        marginBottom: 40,
+    },
+    logo: {
+        width: 180, // Fixed width
+        height: 100, // Fixed height space, image constrains inside
+        marginBottom: 16,
+    },
+    appName: {
+        fontSize: 32,
         fontWeight: 'bold',
-        marginBottom: 10,
-        color: '#1E40AF',
+        color: '#0A192F', // Azul Abismo
+        letterSpacing: -0.5,
     },
     subtitle: {
-        fontSize: 18,
-        marginBottom: 40,
-        color: '#666',
+        fontSize: 16,
+        color: '#6B7280',
+        marginTop: 4,
     },
     formContainer: {
         width: '100%',
-        maxWidth: 300,
+        backgroundColor: 'white',
+        padding: 24,
+        borderRadius: 16,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    inputGroup: {
+        marginBottom: 16,
+    },
+    label: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#374151',
+        marginBottom: 8,
     },
     input: {
-        height: 50,
+        height: 48,
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: '#E5E7EB',
         borderRadius: 8,
-        paddingHorizontal: 15,
-        marginBottom: 15,
+        paddingHorizontal: 16,
         fontSize: 16,
-        backgroundColor: '#f9f9f9',
+        backgroundColor: '#FFFFFF',
+        color: '#1F2937',
     },
     button: {
-        backgroundColor: '#1E40AF',
-        padding: 15,
-        borderRadius: 10,
+        backgroundColor: '#FF6B00', // Naranja Voltio
+        height: 48,
+        borderRadius: 8,
+        justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 10,
+        marginTop: 8,
+        shadowColor: '#FF6B00',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 4,
     },
     buttonText: {
         color: 'white',
@@ -121,12 +181,16 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     registerLink: {
-        marginTop: 20,
+        marginTop: 24,
         alignItems: 'center',
     },
     registerText: {
-        color: '#1E40AF',
+        color: '#6B7280',
         fontSize: 14,
+    },
+    linkBold: {
+        color: '#FF6B00',
+        fontWeight: 'bold',
     },
 });
 

@@ -198,18 +198,18 @@ const RuleManagement: React.FC = () => {
 
     const getStatusBadge = (activa: boolean) => {
         return activa
-            ? { label: 'Activa', className: 'bg-green-100 text-green-800 hover:bg-green-200' }
-            : { label: 'Inactiva', className: 'bg-gray-100 text-gray-800 hover:bg-gray-200' };
+            ? { label: 'Activa', className: 'bg-primary/10 text-primary border-primary/20 border hover:bg-primary/20' }
+            : { label: 'Inactiva', className: 'bg-muted text-muted-foreground border-muted-foreground/30 border hover:bg-muted/80' };
     };
 
     const getTypeBadge = (tipo: string) => {
         const types: Record<string, string> = {
-            'ELEGIBILIDAD': 'bg-blue-100 text-blue-800',
-            'DESCUENTO': 'bg-purple-100 text-purple-800',
-            'NOTIFICACION': 'bg-yellow-100 text-yellow-800',
-            'PROGRAMACION': 'bg-indigo-100 text-indigo-800'
+            'ELEGIBILIDAD': 'bg-primary/10 text-primary border-primary/20 border',
+            'DESCUENTO': 'bg-secondary/10 text-secondary border-secondary/20 border',
+            'NOTIFICACION': 'bg-orange-500/10 text-orange-600 border-orange-500/20 border',
+            'PROGRAMACION': 'bg-blue-500/10 text-blue-500 border-blue-500/20 border'
         };
-        return types[tipo] || 'bg-gray-100 text-gray-800';
+        return types[tipo] || 'bg-muted text-muted-foreground border-muted-foreground/30 border';
     };
 
     // ... (rest of the component)
@@ -218,12 +218,12 @@ const RuleManagement: React.FC = () => {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl mb-2">Reglas de Negocio</h1>
-                    <p className="text-gray-600">Configura las reglas automáticas del sistema</p>
+                    <h1 className="text-3xl mb-2 font-bold tracking-tight">Reglas de Negocio</h1>
+                    <p className="text-muted-foreground">Configura las reglas automáticas del sistema</p>
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => openDialog()}>
+                        <Button className="bg-primary hover:bg-primary/90" onClick={() => openDialog()}>
                             <Plus className="w-4 h-4 mr-2" />
                             Nueva Regla
                         </Button>
@@ -238,6 +238,7 @@ const RuleManagement: React.FC = () => {
                             </DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+                            {/* ... Form Inputs ... */}
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="nombre" className="text-right">
                                     Nombre
@@ -317,24 +318,24 @@ const RuleManagement: React.FC = () => {
                                     <Textarea
                                         id="condiciones"
                                         rows={5}
-                                        className={`font-mono text-sm ${jsonErrors.condiciones ? 'border-red-500' : ''}`}
+                                        className={`font-mono text-sm ${jsonErrors.condiciones ? 'border-destructive' : ''}`}
                                         value={formData.condiciones}
                                         onChange={(e) => handleJsonChange('condiciones', e.target.value)}
                                         disabled={isSubmitting}
                                     />
-                                    {jsonErrors.condiciones && <p className="text-xs text-red-500 mt-1">JSON inválido</p>}
+                                    {jsonErrors.condiciones && <p className="text-xs text-destructive mt-1">JSON inválido</p>}
                                 </div>
                                 <div>
                                     <Label htmlFor="acciones">Acciones (JSON)</Label>
                                     <Textarea
                                         id="acciones"
                                         rows={5}
-                                        className={`font-mono text-sm ${jsonErrors.acciones ? 'border-red-500' : ''}`}
+                                        className={`font-mono text-sm ${jsonErrors.acciones ? 'border-destructive' : ''}`}
                                         value={formData.acciones}
                                         onChange={(e) => handleJsonChange('acciones', e.target.value)}
                                         disabled={isSubmitting}
                                     />
-                                    {jsonErrors.acciones && <p className="text-xs text-red-500 mt-1">JSON inválido</p>}
+                                    {jsonErrors.acciones && <p className="text-xs text-destructive mt-1">JSON inválido</p>}
                                 </div>
                             </div>
                             {error && (
@@ -347,7 +348,7 @@ const RuleManagement: React.FC = () => {
                                 <Button variant="outline" onClick={closeDialog} disabled={isSubmitting}>
                                     Cancelar
                                 </Button>
-                                <Button type="submit" disabled={isSubmitting || jsonErrors.condiciones || jsonErrors.acciones}>
+                                <Button type="submit" disabled={isSubmitting || jsonErrors.condiciones || jsonErrors.acciones} className="bg-primary hover:bg-primary/90">
                                     {isSubmitting ? (
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     ) : editingRule ? (
@@ -367,7 +368,7 @@ const RuleManagement: React.FC = () => {
                 <CardContent className="p-6">
                     <div className="flex items-center gap-2">
                         <div className="flex-1 relative">
-                            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Buscar reglas..."
                                 value={search}
@@ -422,35 +423,35 @@ const RuleManagement: React.FC = () => {
                 <CardContent>
                     {loading ? (
                         <div className="flex justify-center p-8">
-                            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="border-b">
-                                        <th className="text-left p-4 font-medium text-gray-500">Nombre</th>
-                                        <th className="text-left p-4 font-medium text-gray-500">Tipo</th>
-                                        <th className="text-left p-4 font-medium text-gray-500">Prioridad</th>
-                                        <th className="text-left p-4 font-medium text-gray-500">Estado</th>
-                                        <th className="text-right p-4 font-medium text-gray-500">Acciones</th>
+                                    <tr className="border-b border-border">
+                                        <th className="text-left p-4 font-medium text-muted-foreground">Nombre</th>
+                                        <th className="text-left p-4 font-medium text-muted-foreground">Tipo</th>
+                                        <th className="text-left p-4 font-medium text-muted-foreground">Prioridad</th>
+                                        <th className="text-left p-4 font-medium text-muted-foreground">Estado</th>
+                                        <th className="text-right p-4 font-medium text-muted-foreground">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {rules.map((rule) => {
                                         const status = getStatusBadge(rule.activa);
                                         return (
-                                            <tr key={rule.id} className="border-b hover:bg-gray-50 transition-colors">
+                                            <tr key={rule.id} className="border-b border-border hover:bg-muted/50 transition-colors">
                                                 <td className="p-4">
-                                                    <div className="font-medium text-gray-900">{rule.nombre}</div>
-                                                    <div className="text-sm text-gray-500">{rule.descripcion}</div>
+                                                    <div className="font-medium text-foreground">{rule.nombre}</div>
+                                                    <div className="text-sm text-muted-foreground">{rule.descripcion}</div>
                                                 </td>
                                                 <td className="p-4">
                                                     <Badge className={getTypeBadge(rule.tipoRegla)} variant="secondary">
                                                         {rule.tipoRegla}
                                                     </Badge>
                                                 </td>
-                                                <td className="p-4 text-gray-600">{rule.prioridad}</td>
+                                                <td className="p-4 text-muted-foreground">{rule.prioridad}</td>
                                                 <td className="p-4">
                                                     <Badge
                                                         className={`cursor-pointer ${status.className}`}
@@ -464,6 +465,7 @@ const RuleManagement: React.FC = () => {
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
+                                                            className="text-muted-foreground hover:text-foreground"
                                                             onClick={() => openDialog(rule)}
                                                         >
                                                             <Edit className="w-4 h-4" />
@@ -471,9 +473,10 @@ const RuleManagement: React.FC = () => {
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
+                                                            className="text-destructive hover:text-destructive/80 hover:bg-destructive/10"
                                                             onClick={() => handleDelete(rule.id)}
                                                         >
-                                                            <Trash2 className="w-4 h-4 text-red-600" />
+                                                            <Trash2 className="w-4 h-4" />
                                                         </Button>
                                                     </div>
                                                 </td>
@@ -482,7 +485,7 @@ const RuleManagement: React.FC = () => {
                                     })}
                                     {rules.length === 0 && (
                                         <tr>
-                                            <td colSpan={5} className="p-8 text-center text-gray-500">
+                                            <td colSpan={5} className="p-8 text-center text-muted-foreground">
                                                 No hay reglas configuradas. Crea una nueva para comenzar.
                                             </td>
                                         </tr>
